@@ -1,3 +1,4 @@
 pymongo
 fastapi
+fastapi-featureflags
 uvicorn
