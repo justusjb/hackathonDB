@@ -1,13 +1,20 @@
-from fastapi import FastAPI, Form
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.templating import Jinja2Templates
 from pymongo import MongoClient
 import os
 import json
 from bson import ObjectId
 from datetime import datetime
 
+
+# print current working directory
+print(os.getcwd())
+
 app = FastAPI()
+
+templates = Jinja2Templates(directory="templates")
 
 # CORS Middleware
 app.add_middleware(
@@ -52,25 +59,20 @@ def health_check():
 
 if LOCAL_DEV:
     @app.get("/", response_class=HTMLResponse)
-    async def read_form():
-        return """
-        <form action="/submit" method="post">
-            <label for="name">Hackathon Name:</label><br>
-            <input type="text" id="name" name="name"><br>
-            <label for="date">Date (YYYY-MM-DD):</label><br>
-            <input type="text" id="date" name="date"><br><br>
-            <input type="submit" value="Submit">
-        </form>
-        """
+    async def read_form(request: Request):
+        return templates.TemplateResponse("submit_hackathons.html", {"request": request})
 
 
     @app.post("/submit")
-    async def submit_form(name: str = Form(...), date: str = Form(...)):
+    async def submit_form(request: Request):
         client = MongoClient(os.environ['MONGODB_URI'])
         db = client.hackathons_test_1
         collection = db.hackathons
         try:
-            date_obj = datetime.strptime(date, "%Y-%m-%d")
+            data = await request.json()
+            name = data['name']
+            date_str = data['date']
+            date_obj = datetime.strptime(date_str, "%Y-%m-%d")
             hackathon = {
                 "name": name,
                 "date": date_obj
@@ -78,4 +80,4 @@ if LOCAL_DEV:
             collection.insert_one(hackathon)
             return {"message": "Hackathon added successfully!"}
         except Exception as e:
-            return {"error": str(e)}
+            raise HTTPException(status_code=400, detail=str(e))
