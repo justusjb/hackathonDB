@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
             <head>
                 <title>Hackathon Entry Form</title>
                 <style>
@@ -39,6 +39,7 @@
                         margin-bottom: 10px;
                         border: 1px solid #ccc;
                         border-radius: 4px;
+                        box-sizing: border-box;
                     }
                     input[type="submit"] {
                         background-color: #4CAF50;
@@ -103,11 +104,18 @@
             <body>
                 <div class="container">
                 <form onsubmit="submitForm(event)">
+                    
                     <label for="name">Hackathon Name:</label>
                     <input type="text" id="name" name="name" autocomplete="off">
+                    
                     <label for="date">Date (YYYY-MM-DD):</label>
                     <input type="text" id="date" name="date" maxlength="10" autocomplete="off">
+                    
+                    <label for="city">City:</label>
+                    <input type="text" id="city" name="city" autocomplete="off">
+                    
                     <input type="submit" value="Submit">
+
                 </form>
                 <div id="message"></div>
                 </div>
