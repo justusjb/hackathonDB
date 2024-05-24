@@ -2,3 +2,4 @@ pymongo
 fastapi
 fastapi-featureflags
 uvicorn
+opencage

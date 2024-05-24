@@ -82,9 +82,18 @@ if LOCAL_DEV:
 
         all_city_data = results[city_index]
 
+        if ('geometry' not in all_city_data or 'lat' not in all_city_data['geometry'] or 'lng' not in
+                all_city_data['geometry']):
+            raise Exception("City coordinates not found. This is a really weird error that is not supposed to happen.")
+
+        if ('components' not in all_city_data or '_normalized_city' not in all_city_data['components'] or
+                'country' not in all_city_data['components']):
+            raise Exception("City components not found. This is a really weird error that is not supposed to happen.")
+
         return {"lat": all_city_data['geometry']['lat'],
                 "long": all_city_data['geometry']['lng'],
                 "city": all_city_data['components']['_normalized_city'],
+                "state": all_city_data['components']['state'] if 'state' in all_city_data['components'] else None,
                 "country": all_city_data['components']['country']}
 
 
@@ -95,25 +104,34 @@ if LOCAL_DEV:
         collection = db.hackathons
         try:
             data = await request.json()
+
             name = data['name']
             date_str = data['date']
-            city = data['city']
-            city_data = get_city_data(city)
+
+            input_city = data['city']
+            city_data = get_city_data(input_city)
+
+            city = city_data['city']
+            state = city_data['state']
+            country = city_data['country']
+            lat = city_data['lat']
+            long = city_data['long']
 
             date_obj = datetime.strptime(date_str, "%Y-%m-%d")
             hackathon = {
                 "name": name,
                 "date": date_obj,
                 "location": {
-                    "city": city_data['city'],
-                    "country": city_data['country'],
+                    "city": city,
+                    "state": state,
+                    "country": country,
                     "coordinates": {
-                        "lat": city_data['lat'],
-                        "long": city_data['long']
+                        "lat": lat,
+                        "long": long
                     }
                 }
             }
             collection.insert_one(hackathon)
-            return {"message": "Hackathon added successfully!"}
+            return {"message": f"Hackathon added successfully!<br>City: {city}<br>State: {state}<br>Country: {country}"}
         except Exception as e:
             raise HTTPException(status_code=400, detail=str(e))
