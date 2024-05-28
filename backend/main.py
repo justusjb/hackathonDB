@@ -106,21 +106,27 @@ if LOCAL_DEV:
             data = await request.json()
 
             name = data['name']
-            date_str = data['date']
 
+            # Handle date
+            dates = data['date-range'].split(" to ")
+            start_date = datetime.strptime(dates[0], "%Y-%m-%d")
+            end_date = datetime.strptime(dates[1], "%Y-%m-%d")
+
+            # Handle city
             input_city = data['city']
             city_data = get_city_data(input_city)
-
             city = city_data['city']
             state = city_data['state']
             country = city_data['country']
             lat = city_data['lat']
             long = city_data['long']
 
-            date_obj = datetime.strptime(date_str, "%Y-%m-%d")
             hackathon = {
                 "name": name,
-                "date": date_obj,
+                "date": {
+                    "start_date": start_date,
+                    "end_date": end_date
+                },
                 "location": {
                     "city": city,
                     "state": state,
@@ -129,9 +135,15 @@ if LOCAL_DEV:
                         "lat": lat,
                         "long": long
                     }
-                }
+                },
+                "URL": data['URL'],
+                "notes": data['notes'],
+                "status": data['status'],
+                "created_at": datetime.now(),
+
             }
-            collection.insert_one(hackathon)
-            return {"message": f"Hackathon added successfully!<br>City: {city}<br>State: {state}<br>Country: {country}"}
+            db_id = collection.insert_one(hackathon)
+            return {"message": f"Hackathon added successfully!<br>City: {city}<br>State: {state}<br>Country: {country}"
+                               f"<br>ID of the inserted document: {db_id.inserted_id}"}
         except Exception as e:
             raise HTTPException(status_code=400, detail=str(e))

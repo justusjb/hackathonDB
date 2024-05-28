@@ -1,123 +1,216 @@
 <!DOCTYPE html>
 <html lang="en">
-            <head>
-                <title>Hackathon Entry Form</title>
-                <style>
-                    body {
-                        font-family: Arial, sans-serif;
-                        margin: 0;
-                        padding: 0;
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        height: 100vh;
-                        background-color: #f0f0f0;
-                    }
-                    .container {
-                        width: 100%;
-                        max-width: 500px;
-                        padding: 0 20px;
-                        box-sizing: border-box;
-                        text-align: center;
-                    }
-                    form {
-                        background: #fff;
-                        padding: 20px;
-                        border-radius: 5px;
-                        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-                        width: 100%;
-                        box-sizing: border-box;
-                    }
-                    label {
-                        display: block;
-                        margin-bottom: 8px;
-                        font-weight: bold;
-                    }
-                    input[type="text"], input[type="submit"] {
-                        width: 100%;
-                        padding: 8px;
-                        margin-bottom: 10px;
-                        border: 1px solid #ccc;
-                        border-radius: 4px;
-                        box-sizing: border-box;
-                    }
-                    input[type="submit"] {
-                        background-color: #4CAF50;
-                        color: white;
-                        border: none;
-                        cursor: pointer;
-                    }
-                    input[type="submit"]:hover {
-                        background-color: #45a049;
-                    }
-                    #message {
-                        margin-top: 10px;
-                        display: block;
-                        width: 100%;
-                    }
-                    .success {
-                        color: green;
-                    }
-                    .error {
-                        color: red;
-                    }
-                </style>
-                <script>
-                    document.addEventListener('DOMContentLoaded', (event) => {
-                    const dateInput = document.getElementById('date');
+<head>
+    <title>Hackathon Entry Form</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/index.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+        .container {
+            width: 100%;
+            max-width: 500px;
+            padding: 0 20px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        form {
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            box-sizing: border-box;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="submit"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+        .status-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: nowrap;
+        }
+        .status-buttons label {
+            padding: 8px 10px;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            cursor: pointer;
+            /* transition: background-color 0.3s ease; */
+        }
+        .status-buttons input[type="radio"] {
+            display: none;
+        }
+        .status-buttons input[type="radio"]:checked + label {
+            color: white;
+        }
+        .status-buttons #announced:checked + label {
+            background-color: #fbc02d;
+        }
+        .status-buttons #applications_open:checked + label {
+            background-color: #388e3c;
+        }
+        .status-buttons #applications_closed:checked + label {
+            background-color: #d32f2f;
+        }
+        .status-buttons #expected:checked + label {
+            background-color: lightgrey;
+        }
+        #message {
+            margin-top: 10px;
+            display: block;
+            width: 100%;
+        }
+        .success {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <form onsubmit="submitForm(event)">
 
-                    dateInput.addEventListener('input', (event) => {
-                        let value = event.target.value.replace(/\D/g, '');
-                        if (value.length > 4) value = value.slice(0, 4) + '-' + value.slice(4);
-                        if (value.length > 7) value = value.slice(0, 7) + '-' + value.slice(7);
-                        event.target.value = value.slice(0, 10);
-                    });
+        <label for="name">Hackathon Name:</label>
+        <input type="text" id="name" name="name" autocomplete="off">
 
-                    async function submitForm(event) {
-                        event.preventDefault();
-                        const formData = new FormData(event.target);
-                        const formDataJSON = Object.fromEntries(formData.entries());
+        <label for="date-range">Date Range:</label>
+        <input type="text" id="date-range" name="date-range" autocomplete="off">
 
-                        const response = await fetch('/submit', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify(formDataJSON)
-                        });
+        <label for="city">City:</label>
+        <input type="text" id="city" name="city" autocomplete="off">
 
-                        const result = await response.json();
-                        const messageDiv = document.getElementById('message');
-                        if (response.ok) {
-                            messageDiv.innerHTML = '<p class="success">' + result.message + '</p>';
-                            event.target.reset();
-                        } else {
-                            messageDiv.innerHTML = '<p class="error">' + result.detail + '</p>';
-                        }
-                    }
+        <label for="URL">URL:</label>
+        <input type="text" id="URL" name="URL" autocomplete="off">
 
-                    const form = document.querySelector('form');
-                    form.addEventListener('submit', submitForm);
+        <label for="notes">Notes:</label>
+        <input type="text" id="notes" name="notes" autocomplete="off">
+
+
+        <label>Status:</label>
+            <div class="status-buttons">
+                <input type="radio" id="announced" name="status" value="announced">
+                <label for="announced">Announced</label>
+
+                <input type="radio" id="applications_open" name="status" value="applications_open">
+                <label for="applications_open">Applications Open</label>
+
+                <input type="radio" id="applications_closed" name="status" value="applications_closed">
+                <label for="applications_closed">Applications Closed</label>
+
+                <input type="radio" id="expected" name="status" value="expected">
+                <label for="expected">Expected</label>
+
+            </div>
+
+        <input type="submit" value="Submit">
+    </form>
+    <div id="message"></div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    initializeFlatpickr();
+
+    async function submitForm(event) {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        const formDataJSON = Object.fromEntries(formData.entries());
+
+        const response = await fetch('/submit', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formDataJSON)
+        });
+
+        const result = await response.json();
+        const messageDiv = document.getElementById('message');
+        if (response.ok) {
+            messageDiv.innerHTML = '<p class="success">' + result.message + '</p>';
+            event.target.reset();
+            initializeFlatpickr(); // Reinitialize Flatpickr after form reset
+        } else {
+            messageDiv.innerHTML = '<p class="error">' + result.detail + '</p>';
+        }
+    }
+
+    const form = document.querySelector('form');
+    form.addEventListener('submit', submitForm);
+});
+
+function initializeFlatpickr() {
+    const dateInput = document.getElementById('date-range');
+    let flatpickrInstance;
+
+    function calculateMonthDifference(selectedDateString, currentYear, currentMonth) {
+        const selectedDate = new Date(selectedDateString);
+        const selectedYear = selectedDate.getFullYear();
+        const selectedMonth = selectedDate.getMonth();
+        const yearDifference = selectedYear - currentYear;
+        const monthDifference = selectedMonth - currentMonth;
+        return yearDifference * 12 + monthDifference;
+    }
+
+    flatpickrInstance = flatpickr(dateInput, {
+        plugins: [new monthSelectPlugin({
+            shorthand: true,
+            dateFormat: "Y-m",
+            altFormat: "F Y",
+            theme: "light",
+        })],
+        onChange: function (selectedDates, dateStr, instance) {
+            if (selectedDates.length > 0) {
+
+                const selectedMonth = selectedDates[0];
+
+                flatpickrInstance.destroy(); // Destroy the existing instance
+                flatpickrInstance = flatpickr(dateInput, {
+                    mode: 'range',
+                    dateFormat: 'Y-m-d',
+                    minDate: 'today',
+                    defaultDate: null,
                 });
-                </script>
-            </head>
-            <body>
-                <div class="container">
-                <form onsubmit="submitForm(event)">
-                    
-                    <label for="name">Hackathon Name:</label>
-                    <input type="text" id="name" name="name" autocomplete="off">
-                    
-                    <label for="date">Date (YYYY-MM-DD):</label>
-                    <input type="text" id="date" name="date" maxlength="10" autocomplete="off">
-                    
-                    <label for="city">City:</label>
-                    <input type="text" id="city" name="city" autocomplete="off">
-                    
-                    <input type="submit" value="Submit">
-
-                </form>
-                <div id="message"></div>
-                </div>
-            </body>
-        </html>
+                flatpickrInstance.open();
+                flatpickrInstance.changeMonth(calculateMonthDifference(selectedMonth, flatpickrInstance.currentYear, flatpickrInstance.currentMonth));
+                flatpickrInstance.clear();
+            }
+        }
+    });
+}
+</script>
+</body>
+</html>
