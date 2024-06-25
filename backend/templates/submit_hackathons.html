@@ -102,7 +102,7 @@
 </head>
 <body>
 <div class="container">
-    <form onsubmit="submitForm(event)">
+    <form>
 
         <label for="name">Hackathon Name:</label>
         <input type="text" id="name" name="name" autocomplete="off">
@@ -185,31 +185,49 @@ function initializeFlatpickr() {
         return yearDifference * 12 + monthDifference;
     }
 
-    flatpickrInstance = flatpickr(dateInput, {
-        plugins: [new monthSelectPlugin({
-            shorthand: true,
-            dateFormat: "Y-m",
-            altFormat: "F Y",
-            theme: "light",
-        })],
-        onChange: function (selectedDates, dateStr, instance) {
-            if (selectedDates.length > 0) {
-
-                const selectedMonth = selectedDates[0];
-
-                flatpickrInstance.destroy(); // Destroy the existing instance
-                flatpickrInstance = flatpickr(dateInput, {
-                    mode: 'range',
-                    dateFormat: 'Y-m-d',
-                    minDate: 'today',
-                    defaultDate: null,
-                });
-                flatpickrInstance.open();
-                flatpickrInstance.changeMonth(calculateMonthDifference(selectedMonth, flatpickrInstance.currentYear, flatpickrInstance.currentMonth));
-                flatpickrInstance.clear();
+    function initializeMonthPicker() {
+        flatpickrInstance = flatpickr(dateInput, {
+            plugins: [new monthSelectPlugin({
+                shorthand: true,
+                dateFormat: "Y-m",
+                altFormat: "F Y",
+                theme: "light",
+            })],
+            onChange: function (selectedDates, dateStr, instance) {
+                if (selectedDates.length > 0) {
+                    const selectedMonth = selectedDates[0];
+                    switchToDateRangePicker(selectedMonth);
+                }
             }
+        });
+    }
+
+    function switchToDateRangePicker(selectedMonth) {
+        if (flatpickrInstance) {
+            flatpickrInstance.destroy(); // Destroy the existing instance
         }
-    });
+
+        flatpickrInstance = flatpickr(dateInput, {
+            mode: 'range',
+            dateFormat: 'Y-m-d',
+            minDate: 'today',
+            defaultDate: null,
+            locale: {
+                firstDayOfWeek: 1
+            },
+            onReady: function(fp) {
+                if (fp && fp.config) {
+                    fp.config.closeOnSelect = false; // Ensure the option is set after initialization
+                }
+            }
+        });
+
+        flatpickrInstance.open();
+        flatpickrInstance.changeMonth(calculateMonthDifference(selectedMonth, flatpickrInstance.currentYear, flatpickrInstance.currentMonth));
+        flatpickrInstance.clear();
+    }
+
+    initializeMonthPicker(); // Initialize the month picker when the DOM is ready
 }
 </script>
 </body>

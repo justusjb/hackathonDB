@@ -8,6 +8,7 @@ import json
 from bson import ObjectId
 from datetime import datetime
 from opencage.geocoder import OpenCageGeocode
+from pprint import pprint
 
 
 # print current working directory
@@ -66,21 +67,27 @@ if LOCAL_DEV:
         return templates.TemplateResponse("submit_hackathons.html", {"request": request})
 
 
-    def get_city_data(city):
-        query_prefix = 'city of'
-        results = geocoder.geocode(f"{query_prefix} {city}")
-
+    def geodata_api_call(query):
+        results = geocoder.geocode(query)
         city_index = None
-
         for i, result in enumerate(results):
             if result['components']['_type'] == 'city':
                 city_index = i
                 break
+        return results[city_index] if city_index is not None else None
 
-        if city_index is None:
-            raise Exception("City not found")
 
-        all_city_data = results[city_index]
+    def get_city_data(city):
+
+        all_city_data = geodata_api_call(city)
+
+        if all_city_data is None:
+            print("City not found. Retrying with prefix:")
+            query_prefix = 'city of'
+            all_city_data = geodata_api_call(f"{query_prefix} {city}")
+            if all_city_data is None:
+                raise Exception("City not found")
+
 
         if ('geometry' not in all_city_data or 'lat' not in all_city_data['geometry'] or 'lng' not in
                 all_city_data['geometry']):
