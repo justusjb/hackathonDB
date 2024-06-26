@@ -1,5 +1,5 @@
 <script lang="ts">
-    export let data: { hackathons: { name: string; date: { start_date: string; end_date: string };  location: {city: string; country:string}; URL: string}[] };
+    export let data: { hackathons: { name: string; date: { start_date: string; end_date: string };  location: {city: string; country:string}; URL: string; status: string}[] };
 
     // Function to format the date
     function formatDate(dateString: string): string {
@@ -49,6 +49,7 @@
             <th>End Date</th>
             <th>Location</th>
             <th>Website</th>
+            <th>Status</th>
         </tr>
     </thead>
     <tbody>
@@ -59,6 +60,7 @@
                 <td>{formatDate(hack.date.end_date)}</td>
                 <td>{hack.location.city}, {hack.location.country}</td>
                 <td><a href={hack.URL}>Website</a></td>
+                <td>{hack.status}</td>
             </tr>
         {/each}
     </tbody>
