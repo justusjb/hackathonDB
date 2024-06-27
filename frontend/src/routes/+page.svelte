@@ -1,5 +1,6 @@
 <script lang="ts">
     export let data: { hackathons: { name: string; date: { start_date: string; end_date: string };  location: {city: string; country:string}; URL: string; status: string}[] };
+    import { HackathonCard } from '../lib';
 
     // Function to format the date
     function formatDate(dateString: string): string {
@@ -39,30 +40,16 @@
     <meta name="description" content="Find upcoming hackathons!" />
 </svelte:head>
 
-<div>
-<h1>Hackathon Events</h1>
-<table>
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Start Date</th>
-            <th>End Date</th>
-            <th>Location</th>
-            <th>Website</th>
-            <th>Status</th>
-        </tr>
-    </thead>
-    <tbody>
-        {#each data.hackathons as hack}
-            <tr>
-                <td>{hack.name}</td>
-                <td>{formatDate(hack.date.start_date)}</td>
-                <td>{formatDate(hack.date.end_date)}</td>
-                <td>{hack.location.city}, {hack.location.country}</td>
-                <td><a href={hack.URL}>Website</a></td>
-                <td>{hack.status}</td>
-            </tr>
-        {/each}
-    </tbody>
-</table>
+
+<div class="grid grid-cols-1 gap-4 justify-items-center">
+    {#if data.hackathons.length === 0}
+        <div class="flex justify-center items-center h-full">
+            <p>No hackathons available.</p>
+        </div>
+    {/if}
+    {#each data.hackathons as hackathon}
+        <div class="max-w-lg w-full">
+            <HackathonCard {hackathon} />
+        </div>
+    {/each}
 </div>
