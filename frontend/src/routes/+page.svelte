@@ -67,6 +67,7 @@
 
 
 <div class="p-4">
+
     <input
         type="text"
         placeholder="Search hackathons..."
@@ -74,20 +75,24 @@
         on:input={handleInput}
     />
 
-    <div class="mb-4">
-        <label>
-            <input type="checkbox" on:change={() => toggleStatus('announced')}> Announced
-        </label>
-        <label>
-            <input type="checkbox" on:change={() => toggleStatus('applications_open')}> Applications Open
-        </label>
-        <label>
-            <input type="checkbox" on:change={() => toggleStatus('applications_closed')}> Applications Closed
-        </label>
-        <label>
-            <input type="checkbox" on:change={() => toggleStatus('expected')}> Expected
-        </label>
-    </div>
+<div class="mb-4">
+    <label class="inline-flex items-center mr-4">
+        <input type="checkbox" class="form-checkbox text-yellow-500 h-5 w-5" on:change={() => toggleStatus('announced')}>
+        <span class="ml-2 text-gray-700">Announced</span>
+    </label>
+    <label class="inline-flex items-center mr-4">
+        <input type="checkbox" class="form-checkbox text-green-600 h-5 w-5" on:change={() => toggleStatus('applications_open')}>
+        <span class="ml-2 text-gray-700">Applications Open</span>
+    </label>
+    <label class="inline-flex items-center mr-4">
+        <input type="checkbox" class="form-checkbox text-red-600 h-5 w-5" on:change={() => toggleStatus('applications_closed')}>
+        <span class="ml-2 text-gray-700">Applications Closed</span>
+    </label>
+    <label class="inline-flex items-center mr-4">
+        <input type="checkbox" class="form-checkbox text-gray-400 h-5 w-5" on:change={() => toggleStatus('expected')}>
+        <span class="ml-2 text-gray-700">Expected</span>
+    </label>
+</div>
 
 <div class="grid grid-cols-1 gap-4 justify-items-center">
     {#if data.hackathons.length === 0}
