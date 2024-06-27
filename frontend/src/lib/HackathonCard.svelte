@@ -1,12 +1,17 @@
-<script>
-    export let hackathon;
-
-    function formatDate(dateString) {
+<script lang="ts">
+    export let hackathon: {
+        name: string;
+        date: { start_date: string; end_date: string };
+        location: { city: string; country: string };
+        URL: string;
+        status: string;
+    };
+    function formatDate(dateString: string) {
         const date = new Date(dateString);
         return date.toLocaleDateString();
     }
 
-    function getStatusClass(status) {
+    function getStatusClass(status: string) {
         switch (status) {
             case 'announced':
                 return 'bg-yellow-500';
