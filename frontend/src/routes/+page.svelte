@@ -1,20 +1,41 @@
 <script lang="ts">
-    export let data: { hackathons: { name: string; date: { start_date: string; end_date: string };  location: {city: string; country:string}; URL: string; status: string}[] };
     import { HackathonCard } from '../lib';
     import { writable, derived } from 'svelte/store';
 
+    type Hackathon = {
+        name: string;
+        date: { start_date: string; end_date: string };
+        location: { city: string; country: string };
+        URL: string;
+        status: string;
+    };
+
+    export let data: { hackathons: Hackathon[] };
+
     const filterText = writable('');
+    const selectedStatuses = writable<Set<string>>(new Set());
 
     const filteredHackathons = derived(
-        [filterText, writable(data.hackathons)],
-        ([$filterText, $hackathons]) => {
-            if (!$filterText) return $hackathons;
-            return $hackathons.filter(hackathon =>
-                hackathon.name.toLowerCase().includes($filterText.toLowerCase()) ||
-                hackathon.location.city.toLowerCase().includes($filterText.toLowerCase()) ||
-                hackathon.location.country.toLowerCase().includes($filterText.toLowerCase()) ||
-                hackathon.status.toLowerCase().includes($filterText.toLowerCase())
-            );
+        [filterText, writable(data.hackathons), selectedStatuses],
+        ([$filterText, $hackathons, $selectedStatuses]) => {
+            let filtered = $hackathons;
+
+            if ($filterText) {
+                filtered = filtered.filter(hackathon =>
+                    hackathon.name.toLowerCase().includes($filterText.toLowerCase()) ||
+                    hackathon.location.city.toLowerCase().includes($filterText.toLowerCase()) ||
+                    hackathon.location.country.toLowerCase().includes($filterText.toLowerCase()) ||
+                    hackathon.status.toLowerCase().includes($filterText.toLowerCase())
+                );
+            }
+
+            if ($selectedStatuses.size > 0) {
+                filtered = filtered.filter(hackathon =>
+                    $selectedStatuses.has(hackathon.status)
+                );
+            }
+
+            return filtered;
         }
     );
 
@@ -23,6 +44,17 @@
         if (target) {
             filterText.set(target.value);
         }
+    }
+
+        function toggleStatus(status: string) {
+        selectedStatuses.update(set => {
+            if (set.has(status)) {
+                set.delete(status);
+            } else {
+                set.add(status);
+            }
+            return new Set(set);
+        });
     }
 </script>
 
@@ -41,6 +73,22 @@
         class="border p-2 mb-4 w-full"
         on:input={handleInput}
     />
+
+    <div class="mb-4">
+        <label>
+            <input type="checkbox" on:change={() => toggleStatus('announced')}> Announced
+        </label>
+        <label>
+            <input type="checkbox" on:change={() => toggleStatus('applications_open')}> Applications Open
+        </label>
+        <label>
+            <input type="checkbox" on:change={() => toggleStatus('applications_closed')}> Applications Closed
+        </label>
+        <label>
+            <input type="checkbox" on:change={() => toggleStatus('expected')}> Expected
+        </label>
+    </div>
+
 <div class="grid grid-cols-1 gap-4 justify-items-center">
     {#if data.hackathons.length === 0}
         <div class="flex justify-center items-center h-full">
