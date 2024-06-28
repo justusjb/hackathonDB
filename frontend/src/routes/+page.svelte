@@ -1,6 +1,8 @@
 <script lang="ts">
     import { HackathonCard } from '../lib';
     import { writable, derived } from 'svelte/store';
+    import LocationFilter from './LocationFilter.svelte';
+
 
     type Hackathon = {
         name: string;
@@ -14,10 +16,12 @@
 
     const filterText = writable('');
     const selectedStatuses = writable<Set<string>>(new Set());
+    const selectedLocations = writable({ countries: [], cities: [] });
+
 
     const filteredHackathons = derived(
-        [filterText, writable(data.hackathons), selectedStatuses],
-        ([$filterText, $hackathons, $selectedStatuses]) => {
+        [filterText, writable(data.hackathons), selectedStatuses, selectedLocations],
+        ([$filterText, $hackathons, $selectedStatuses, $selectedLocations]) => {
             let filtered = $hackathons;
 
             if ($filterText) {
@@ -32,6 +36,13 @@
             if ($selectedStatuses.size > 0) {
                 filtered = filtered.filter(hackathon =>
                     $selectedStatuses.has(hackathon.status)
+                );
+            }
+
+            if ($selectedLocations.countries.length > 0 || $selectedLocations.cities.length > 0) {
+                filtered = filtered.filter(hackathon =>
+                    ($selectedLocations.countries.length === 0 || $selectedLocations.countries.includes(hackathon.location.country)) &&
+                    ($selectedLocations.cities.length === 0 || $selectedLocations.cities.includes(hackathon.location.city))
                 );
             }
 
@@ -56,6 +67,11 @@
             return new Set(set);
         });
     }
+
+        function handleLocationFilterUpdate(event: CustomEvent) {
+        selectedLocations.set(event.detail);
+    }
+
 </script>
 
 
@@ -93,6 +109,11 @@
         <span class="ml-2 text-gray-700">Expected</span>
     </label>
 </div>
+
+<LocationFilter
+    hackathons={data.hackathons}
+    on:filterUpdate={handleLocationFilterUpdate}
+/>
 
 <div class="grid grid-cols-1 gap-4 justify-items-center">
     {#if data.hackathons.length === 0}
