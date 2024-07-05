@@ -8,38 +8,58 @@
 
     type SelectOption = { value: string; label: string };
 
-    let selectedCountries: SelectOption[] = [];
-    let selectedCities: SelectOption[] = [];
+    let availableCities: SelectOption[] = [];
+    let checkedCountries: string[] = [];
+    let checkedCities: string[] = [];
+    let isCheckedCountry: { [key: string]: boolean } = {};
+    let isCheckedCity: { [key: string]: boolean } = {};
 
     $: countries = [...new Set(hackathons.map(h => h.location.country))]
-        .sort()
-        .map(country => ({ value: country, label: country }));
+    .sort()
+    .map(country => ({ value: country, label: country }));
 
-    $: availableCities = [...new Set(hackathons
-        .filter(h => !selectedCountries || selectedCountries.length === 0 || selectedCountries.find(sc => sc.value === h.location.country))
-        .map(h => h.location.city))]
-        .sort()
-        .map(city => ({ value: city, label: city }));
+    $: computeCheckedStates();
+    $: computeIsChecked();
 
-    function handleCountryChange(event: CustomEvent) {
-        selectedCountries = event.detail || [];
-        selectedCities = selectedCities.filter(city =>
-            availableCities.find(ac => ac.value === city.value)
-        );
+    function computeCheckedStates() {
+        availableCities = [...new Set(hackathons
+            .filter(h => !checkedCountries.length || checkedCountries.includes(h.location.country))
+            .map(h => h.location.city))]
+            .sort()
+            .map(city => ({ value: city, label: city }));
+        checkedCities = checkedCities.filter(city => availableCities.some(ac => ac.value === city));
         updateFilters();
     }
 
+    function computeIsChecked() {
+        isCheckedCountry = {};
+        checkedCountries.forEach((c) => (isCheckedCountry[c] = true));
+        isCheckedCity = {};
+        checkedCities.forEach((c) => (isCheckedCity[c] = true));
+    }
 
-    function handleCityChange(event: CustomEvent) {
-        selectedCities = event.detail || [];
-        updateFilters();
+    function handleChange(event: CustomEvent, type: 'country' | 'city') {
+        if (type === 'country') {
+            if (checkedCountries.includes(event.detail.value)) {
+                checkedCountries = checkedCountries.filter(c => c !== event.detail.value);
+            } else {
+                checkedCountries = [...checkedCountries, event.detail.value];
+            }
+        } else if (type === 'city') {
+            if (checkedCities.includes(event.detail.value)) {
+                checkedCities = checkedCities.filter(c => c !== event.detail.value);
+            } else {
+                checkedCities = [...checkedCities, event.detail.value];
+            }
+        }
+        computeCheckedStates();
     }
 
 
 function updateFilters() {
     dispatch('filterUpdate', {
-        countries: selectedCountries.map(c => c.value),
-        cities: selectedCities.map(c => c.value)
+        countries: checkedCountries,
+        cities: checkedCities
     });
 }
 
@@ -51,15 +71,22 @@ $: {
 <div class="mb-4">
     <h3 class="font-bold mb-2">Countries</h3>
     <Select
-        items={countries}
-        multiple={true}
-        bind:value={selectedCountries}
-        on:change={handleCountryChange}
-        placeholder="Select countries..."
-    />
-    {#if !selectedCountries || selectedCountries.length === 0}
-        <span class="text-sm text-gray-500 mt-1">All countries selected</span>
-    {/if}
+    items={countries}
+    multiple={true}
+    filterSelectedItems={false}
+    closeListOnChange={false}
+    on:select={e => handleChange(e, 'country')}
+    on:clear={e => handleChange(e, 'country')}>
+    <div class="item" slot="item" let:item>
+        <label for={item.value}>
+            <input type="checkbox" id={item.value} bind:checked={isCheckedCountry[item.value]} />
+            {item.label}
+        </label>
+    </div>
+</Select>
+{#if !checkedCountries.length}
+    <span class="text-sm text-gray-500 mt-1">All countries selected</span>
+{/if}
 </div>
 
 <div class="mb-4">
@@ -67,12 +94,19 @@ $: {
     <Select
         items={availableCities}
         multiple={true}
-        bind:value={selectedCities}
-        on:change={handleCityChange}
-        placeholder="Select cities..."
-        disabled={!selectedCountries || selectedCountries.length === 0}
-    />
-    {#if !selectedCities || selectedCities.length === 0}
-        <span class="text-sm text-gray-500 mt-1">All cities selected</span>
-    {/if}
+        filterSelectedItems={false}
+        closeListOnChange={false}
+        on:select={e => handleChange(e, 'city')}
+        on:clear={e => handleChange(e, 'city')}
+        disabled={!checkedCountries.length}>
+        <div class="item" slot="item" let:item>
+            <label for={item.value}>
+                <input type="checkbox" id={item.value} bind:checked={isCheckedCity[item.value]} />
+                {item.label}
+            </label>
+        </div>
+    </Select>
+{#if !checkedCities.length}
+    <span class="text-sm text-gray-500 mt-1">All cities selected</span>
+{/if}
 </div>
