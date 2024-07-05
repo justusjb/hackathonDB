@@ -37,7 +37,7 @@ const filteredHackathons = derived(
                 $selectedLocations.cities.includes(hackathon.location.city);
 
             return textMatch && statusMatch && countryMatch && cityMatch;
-        });
+        }).sort((a, b) => new Date(a.date.start_date).getTime() - new Date(b.date.start_date).getTime());
     }
 );
 

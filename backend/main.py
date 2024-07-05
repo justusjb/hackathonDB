@@ -44,7 +44,8 @@ class JSONEncoder(json.JSONEncoder):
 @app.get("/api/hackathons")
 async def read_hackathons():
     client = MongoClient(os.getenv('MONGODB_URI'))
-    db = client.hackathons_test_1
+    # db = client.hackathons_test_1
+    db = client.hackathons_prod
     collection = db.hackathons
     hackathons = list(collection.find({}))
     print(hackathons)
@@ -107,7 +108,8 @@ if LOCAL_DEV:
     @app.post("/submit")
     async def submit_form(request: Request):
         client = MongoClient(os.getenv('MONGODB_URI'))
-        db = client.hackathons_test_1
+        #db = client.hackathons_test_1
+        db = client.hackathons_prod
         collection = db.hackathons
         try:
             data = await request.json()
