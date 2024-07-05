@@ -18,9 +18,6 @@
     .sort()
     .map(country => ({ value: country, label: country }));
 
-    //$: computeCheckedStates();
-    //$: computeIsChecked();
-
     function computeCheckedStates() {
         availableCities = [...new Set(hackathons
             .filter(h => !checkedCountries.length || checkedCountries.includes(h.location.country))
@@ -62,12 +59,8 @@ function updateFilters() {
         countries: checkedCountries,
         cities: checkedCities
     });
-    console.log("checkedCountries", checkedCountries, "checkedCities", checkedCities, "isCheckedCountry", isCheckedCountry, "isCheckedCity", isCheckedCity);
 }
 
-//$: {
-//    updateFilters();
-//}
 </script>
 
 <div class="mb-4">
