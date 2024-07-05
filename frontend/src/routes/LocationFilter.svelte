@@ -11,47 +11,81 @@
     let availableCities: SelectOption[] = [];
     let checkedCountries: string[] = [];
     let checkedCities: string[] = [];
+
     let isCheckedCountry: { [key: string]: boolean } = {};
     let isCheckedCity: { [key: string]: boolean } = {};
+    let valueCountry: SelectOption[] = [];
+    let valueCity: SelectOption[] = [];
 
-    $: countries = [...new Set(hackathons.map(h => h.location.country))]
+$: countries = [...new Set(hackathons.map(h => h.location.country))]
     .sort()
     .map(country => ({ value: country, label: country }));
 
-    function computeCheckedStates() {
-        availableCities = [...new Set(hackathons
-            .filter(h => !checkedCountries.length || checkedCountries.includes(h.location.country))
-            .map(h => h.location.city))]
-            .sort()
-            .map(city => ({ value: city, label: city }));
-        checkedCities = checkedCities.filter(city => availableCities.some(ac => ac.value === city));
-    }
+function computeCheckedStates() {
+    availableCities = [...new Set(hackathons
+        .filter(h => !checkedCountries.length || checkedCountries.includes(h.location.country))
+        .map(h => h.location.city))]
+        .sort()
+        .map(city => ({ value: city, label: city }));
+    checkedCities = checkedCities.filter(city => availableCities.some(ac => ac.value === city));
+    updateFilters();
+}
 
-    function computeIsChecked() {
+function computeIsChecked(type: 'country' | 'city') {
+    if (type === 'country') {
         isCheckedCountry = {};
         checkedCountries.forEach((c) => (isCheckedCountry[c] = true));
+    } else if (type === 'city') {
         isCheckedCity = {};
         checkedCities.forEach((c) => (isCheckedCity[c] = true));
     }
+}
 
-    function handleChange(event: CustomEvent, type: 'country' | 'city') {
-        if (type === 'country') {
+function computeValue(type: 'country' | 'city') {
+    if (type === 'country') {
+        valueCountry = checkedCountries.map((c) => countries.find((i) => i.value === c)).filter((i): i is SelectOption => i !== undefined);
+    } else if (type === 'city') {
+        valueCity = checkedCities.map((c) => availableCities.find((i) => i.value === c)).filter((i): i is SelectOption => i !== undefined);
+    }
+}
+
+function handleChange(event: CustomEvent, type: 'country' | 'city') {
+    if (type === 'country') {
+        if (event.type === 'select') {
             if (checkedCountries.includes(event.detail.value)) {
                 checkedCountries = checkedCountries.filter(c => c !== event.detail.value);
             } else {
                 checkedCountries = [...checkedCountries, event.detail.value];
             }
-        } else if (type === 'city') {
+        } else if (event.type === 'clear') {
+            if (Array.isArray(event.detail)) {
+                checkedCountries = [];
+            } else if (event.detail.value) {
+                checkedCountries = checkedCountries.filter(c => c !== event.detail.value);
+            }
+        }
+    } else if (type === 'city') {
+        if (event.type === 'select') {
             if (checkedCities.includes(event.detail.value)) {
                 checkedCities = checkedCities.filter(c => c !== event.detail.value);
             } else {
                 checkedCities = [...checkedCities, event.detail.value];
             }
+        } else if (event.type === 'clear') {
+            if (Array.isArray(event.detail)) {
+                checkedCities = [];
+            } else if (event.detail.value) {
+                checkedCities = checkedCities.filter(c => c !== event.detail.value);
+            }
         }
-        computeCheckedStates();
-        computeIsChecked();
-        updateFilters();
     }
+    computeCheckedStates();
+    computeIsChecked('country');
+    computeIsChecked('city');
+    computeValue('country');
+    computeValue('city');
+    updateFilters();
+}
 
 
 function updateFilters() {
@@ -60,13 +94,13 @@ function updateFilters() {
         cities: checkedCities
     });
 }
-
 </script>
 
 <div class="mb-4">
     <h3 class="font-bold mb-2">Countries</h3>
     <Select
     items={countries}
+    bind:value={valueCountry}
     multiple={true}
     filterSelectedItems={false}
     closeListOnChange={false}
@@ -86,21 +120,22 @@ function updateFilters() {
 
 <div class="mb-4">
     <h3 class="font-bold mb-2">Cities</h3>
-    <Select
-        items={availableCities}
-        multiple={true}
-        filterSelectedItems={false}
-        closeListOnChange={false}
-        on:select={e => handleChange(e, 'city')}
-        on:clear={e => handleChange(e, 'city')}
-        disabled={!checkedCountries.length}>
-        <div class="item" slot="item" let:item>
-            <label for={item.value}>
-                <input type="checkbox" id={item.value} bind:checked={isCheckedCity[item.value]} />
-                {item.label}
-            </label>
-        </div>
-    </Select>
+<Select
+    items={availableCities}
+    bind:value={valueCity}
+    multiple={true}
+    filterSelectedItems={false}
+    closeListOnChange={false}
+    on:select={e => handleChange(e, 'city')}
+    on:clear={e => handleChange(e, 'city')}
+    disabled={!checkedCountries.length}>
+    <div class="item" slot="item" let:item>
+        <label for={item.value}>
+            <input type="checkbox" id={item.value} bind:checked={isCheckedCity[item.value]} />
+            {item.label}
+        </label>
+    </div>
+</Select>
 {#if !checkedCities.length}
     <span class="text-sm text-gray-500 mt-1">All cities selected</span>
 {/if}
