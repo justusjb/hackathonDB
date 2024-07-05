@@ -1,67 +1,78 @@
 <script lang="ts">
     import { createEventDispatcher } from 'svelte';
+    import Select from 'svelte-select';
 
-    export let hackathons: any[];
+    export let hackathons: Array<{ location: { country: string; city: string } }>;
 
     const dispatch = createEventDispatcher();
 
-    let selectedCountries = new Set();
-    let selectedCities = new Set();
+    type SelectOption = { value: string; label: string };
 
-    $: countries = [...new Set(hackathons.map(h => h.location.country))].sort();
-    $: cities = [...new Set(hackathons.map(h => h.location.city))].sort();
+    let selectedCountries: SelectOption[] = [];
+    let selectedCities: SelectOption[] = [];
 
-    function toggleCountry(country: string) {
-        if (selectedCountries.has(country)) {
-            selectedCountries.delete(country);
-            selectedCities = new Set([...selectedCities].filter(city =>
-                hackathons.some(h => h.location.city === city && h.location.country !== country)
-            ));
-        } else {
-            selectedCountries.add(country);
-        }
+    $: countries = [...new Set(hackathons.map(h => h.location.country))]
+        .sort()
+        .map(country => ({ value: country, label: country }));
+
+    $: availableCities = [...new Set(hackathons
+        .filter(h => !selectedCountries || selectedCountries.length === 0 || selectedCountries.find(sc => sc.value === h.location.country))
+        .map(h => h.location.city))]
+        .sort()
+        .map(city => ({ value: city, label: city }));
+
+    function handleCountryChange(event: CustomEvent) {
+        selectedCountries = event.detail || [];
+        selectedCities = selectedCities.filter(city =>
+            availableCities.find(ac => ac.value === city.value)
+        );
         updateFilters();
     }
 
-    function toggleCity(city: string) {
-        if (selectedCities.has(city)) {
-            selectedCities.delete(city);
-        } else {
-            selectedCities.add(city);
-            const country = hackathons.find(h => h.location.city === city)?.location.country;
-            if (country) selectedCountries.add(country);
-        }
+
+    function handleCityChange(event: CustomEvent) {
+        selectedCities = event.detail || [];
         updateFilters();
     }
 
-    function updateFilters() {
-        dispatch('filterUpdate', {
-            countries: [...selectedCountries],
-            cities: [...selectedCities]
-        });
-    }
+
+function updateFilters() {
+    dispatch('filterUpdate', {
+        countries: selectedCountries.map(c => c.value),
+        cities: selectedCities.map(c => c.value)
+    });
+}
+
+$: {
+    updateFilters();
+}
 </script>
 
 <div class="mb-4">
     <h3 class="font-bold mb-2">Countries</h3>
-    {#each countries as country}
-        <label class="inline-flex items-center mr-4 mb-2">
-            <input type="checkbox" class="form-checkbox h-5 w-5"
-                   checked={selectedCountries.has(country)}
-                   on:change={() => toggleCountry(country)}>
-            <span class="ml-2 text-gray-700">{country}</span>
-        </label>
-    {/each}
+    <Select
+        items={countries}
+        multiple={true}
+        bind:value={selectedCountries}
+        on:change={handleCountryChange}
+        placeholder="Select countries..."
+    />
+    {#if !selectedCountries || selectedCountries.length === 0}
+        <span class="text-sm text-gray-500 mt-1">All countries selected</span>
+    {/if}
 </div>
 
 <div class="mb-4">
     <h3 class="font-bold mb-2">Cities</h3>
-    {#each cities as city}
-        <label class="inline-flex items-center mr-4 mb-2">
-            <input type="checkbox" class="form-checkbox h-5 w-5"
-                   checked={selectedCities.has(city)}
-                   on:change={() => toggleCity(city)}>
-            <span class="ml-2 text-gray-700">{city}</span>
-        </label>
-    {/each}
+    <Select
+        items={availableCities}
+        multiple={true}
+        bind:value={selectedCities}
+        on:change={handleCityChange}
+        placeholder="Select cities..."
+        disabled={!selectedCountries || selectedCountries.length === 0}
+    />
+    {#if !selectedCities || selectedCities.length === 0}
+        <span class="text-sm text-gray-500 mt-1">All cities selected</span>
+    {/if}
 </div>

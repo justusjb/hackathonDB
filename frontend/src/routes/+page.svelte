@@ -16,39 +16,31 @@
 
     const filterText = writable('');
     const selectedStatuses = writable<Set<string>>(new Set());
-    const selectedLocations = writable({ countries: [], cities: [] });
+const selectedLocations = writable<{ countries: string[], cities: string[] }>({ countries: [], cities: [] });
 
+const filteredHackathons = derived(
+    [filterText, writable(data.hackathons), selectedStatuses, selectedLocations],
+    ([$filterText, $hackathons, $selectedStatuses, $selectedLocations]) => {
+        console.log('Filtering hackathons...', $selectedLocations); // For debugging
+        return $hackathons.filter(hackathon => {
+            const textMatch = !$filterText ||
+                hackathon.name.toLowerCase().includes($filterText.toLowerCase()) ||
+                hackathon.location.city.toLowerCase().includes($filterText.toLowerCase()) ||
+                hackathon.location.country.toLowerCase().includes($filterText.toLowerCase()) ||
+                hackathon.status.toLowerCase().includes($filterText.toLowerCase());
 
-    const filteredHackathons = derived(
-        [filterText, writable(data.hackathons), selectedStatuses, selectedLocations],
-        ([$filterText, $hackathons, $selectedStatuses, $selectedLocations]) => {
-            let filtered = $hackathons;
+            const statusMatch = $selectedStatuses.size === 0 || $selectedStatuses.has(hackathon.status);
 
-            if ($filterText) {
-                filtered = filtered.filter(hackathon =>
-                    hackathon.name.toLowerCase().includes($filterText.toLowerCase()) ||
-                    hackathon.location.city.toLowerCase().includes($filterText.toLowerCase()) ||
-                    hackathon.location.country.toLowerCase().includes($filterText.toLowerCase()) ||
-                    hackathon.status.toLowerCase().includes($filterText.toLowerCase())
-                );
-            }
+            const countryMatch = $selectedLocations.countries.length === 0 ||
+                $selectedLocations.countries.includes(hackathon.location.country);
 
-            if ($selectedStatuses.size > 0) {
-                filtered = filtered.filter(hackathon =>
-                    $selectedStatuses.has(hackathon.status)
-                );
-            }
+            const cityMatch = $selectedLocations.cities.length === 0 ||
+                $selectedLocations.cities.includes(hackathon.location.city);
 
-            if ($selectedLocations.countries.length > 0 || $selectedLocations.cities.length > 0) {
-                filtered = filtered.filter(hackathon =>
-                    ($selectedLocations.countries.length === 0 || $selectedLocations.countries.includes(hackathon.location.country)) &&
-                    ($selectedLocations.cities.length === 0 || $selectedLocations.cities.includes(hackathon.location.city))
-                );
-            }
-
-            return filtered;
-        }
-    );
+            return textMatch && statusMatch && countryMatch && cityMatch;
+        });
+    }
+);
 
     function handleInput(event: Event) {
         const target = event.target as HTMLInputElement;
@@ -68,9 +60,12 @@
         });
     }
 
-        function handleLocationFilterUpdate(event: CustomEvent) {
-        selectedLocations.set(event.detail);
-    }
+function handleLocationFilterUpdate(event: CustomEvent<{ countries: string[], cities: string[] }>) {
+    console.log('Filter update received:', event.detail); // For debugging
+    selectedLocations.set(event.detail);
+}
+
+$: console.log('Selected locations:', $selectedLocations); // For debugging
 
 </script>
 
@@ -110,10 +105,10 @@
     </label>
 </div>
 
-<LocationFilter
-    hackathons={data.hackathons}
-    on:filterUpdate={handleLocationFilterUpdate}
-/>
+    <LocationFilter
+        hackathons={data.hackathons}
+        on:filterUpdate={handleLocationFilterUpdate}
+    />
 
 <div class="grid grid-cols-1 gap-4 justify-items-center">
     {#if data.hackathons.length === 0}
