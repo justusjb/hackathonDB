@@ -21,7 +21,6 @@ const selectedLocations = writable<{ countries: string[], cities: string[] }>({ 
 const filteredHackathons = derived(
     [filterText, writable(data.hackathons), selectedStatuses, selectedLocations],
     ([$filterText, $hackathons, $selectedStatuses, $selectedLocations]) => {
-        console.log('Filtering hackathons...', $selectedLocations); // For debugging
         return $hackathons.filter(hackathon => {
             const textMatch = !$filterText ||
                 hackathon.name.toLowerCase().includes($filterText.toLowerCase()) ||
@@ -61,11 +60,9 @@ const filteredHackathons = derived(
     }
 
 function handleLocationFilterUpdate(event: CustomEvent<{ countries: string[], cities: string[] }>) {
-    console.log('Filter update received:', event.detail); // For debugging
     selectedLocations.set(event.detail);
 }
 
-$: console.log('Selected locations:', $selectedLocations); // For debugging
 
 </script>
 

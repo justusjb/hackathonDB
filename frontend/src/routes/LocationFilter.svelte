@@ -18,8 +18,8 @@
     .sort()
     .map(country => ({ value: country, label: country }));
 
-    $: computeCheckedStates();
-    $: computeIsChecked();
+    //$: computeCheckedStates();
+    //$: computeIsChecked();
 
     function computeCheckedStates() {
         availableCities = [...new Set(hackathons
@@ -28,7 +28,6 @@
             .sort()
             .map(city => ({ value: city, label: city }));
         checkedCities = checkedCities.filter(city => availableCities.some(ac => ac.value === city));
-        updateFilters();
     }
 
     function computeIsChecked() {
@@ -53,6 +52,8 @@
             }
         }
         computeCheckedStates();
+        computeIsChecked();
+        updateFilters();
     }
 
 
@@ -61,11 +62,12 @@ function updateFilters() {
         countries: checkedCountries,
         cities: checkedCities
     });
+    console.log("checkedCountries", checkedCountries, "checkedCities", checkedCities, "isCheckedCountry", isCheckedCountry, "isCheckedCity", isCheckedCity);
 }
 
-$: {
-    updateFilters();
-}
+//$: {
+//    updateFilters();
+//}
 </script>
 
 <div class="mb-4">
