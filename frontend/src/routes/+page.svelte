@@ -25,8 +25,7 @@ const filteredHackathons = derived(
             const textMatch = !$filterText ||
                 hackathon.name.toLowerCase().includes($filterText.toLowerCase()) ||
                 hackathon.location.city.toLowerCase().includes($filterText.toLowerCase()) ||
-                hackathon.location.country.toLowerCase().includes($filterText.toLowerCase()) ||
-                hackathon.status.toLowerCase().includes($filterText.toLowerCase());
+                hackathon.location.country.toLowerCase().includes($filterText.toLowerCase())
 
             const statusMatch = $selectedStatuses.size === 0 || $selectedStatuses.has(hackathon.status);
 
