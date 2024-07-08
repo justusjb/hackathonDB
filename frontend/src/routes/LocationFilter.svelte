@@ -17,9 +17,22 @@
     let valueCountry: SelectOption[] = [];
     let valueCity: SelectOption[] = [];
 
+    function getHackathonCounts() {
+    const counts: { [key: string]: number } = {};
+    hackathons.forEach(h => {
+        counts[h.location.country] = (counts[h.location.country] || 0) + 1;
+    });
+    return counts;
+}
+
+const hackathonCounts = getHackathonCounts();
+
 $: countries = [...new Set(hackathons.map(h => h.location.country))]
     .sort()
-    .map(country => ({ value: country, label: country }));
+    .map(country => ({
+        value: country,
+        label: `${country} (${hackathonCounts[country]})`
+    }));
 
 function computeCheckedStates() {
     availableCities = [...new Set(hackathons
