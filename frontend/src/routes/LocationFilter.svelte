@@ -96,6 +96,12 @@ function updateFilters() {
 }
 </script>
 
+<style>
+    .item {
+        pointer-events: none;
+    }
+</style>
+
 <div class="mb-4">
     <h3 class="font-bold mb-2">Countries</h3>
     <Select
