@@ -115,6 +115,14 @@ function updateFilters() {
     }
 </style>
 
+<!--
+How to add nice shadow to the bottom of dropdown:
+
+--list-shadow="inset 0 -10px 10px -10px rgba(0, 0, 0, 0.5)"
+--item-hover-bg="rgba(0, 123, 255, 0.1)"
+
+-->
+
 <div class="mb-4">
     <h3 class="font-bold mb-2">Countries</h3>
     <Select
@@ -123,6 +131,7 @@ function updateFilters() {
     multiple={true}
     filterSelectedItems={false}
     closeListOnChange={false}
+    --list-max-height="10000px"
     on:select={e => handleChange(e, 'country')}
     on:clear={e => handleChange(e, 'country')}>
     <div class="item" slot="item" let:item>
@@ -145,6 +154,7 @@ function updateFilters() {
     multiple={true}
     filterSelectedItems={false}
     closeListOnChange={false}
+    --list-max-height="10000px"
     on:select={e => handleChange(e, 'city')}
     on:clear={e => handleChange(e, 'city')}
     disabled={!checkedCountries.length}>
