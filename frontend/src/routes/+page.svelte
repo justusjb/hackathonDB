@@ -54,17 +54,91 @@
         selectedStatuses.set(event.detail.statuses);
     }
 
+
 </script>
 
 
+<style>
+    .custom-button {
+        background-color: #1E3A8A; /* Darker blue color */
+        border: 2px solid #1E3A8A; /* Matching border color */
+        color: white;
+        border-radius: 0 0.5rem 0.5rem 0; /* Adjusted border-radius to match input */
+        padding: 0.5rem 1rem;
+        transition: background-color 0.3s, border-color 0.3s; /* Smooth transition */
+    }
+
+    .custom-button:hover {
+        background-color: #1D4ED8; /* Slightly lighter blue on hover */
+        border-color: #1D4ED8; /* Matching border color on hover */
+    }
+
+    .custom-button:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5); /* Focus ring */
+    }
+</style>
+
+
+
 <svelte:head>
-    <title>Hackathon Events</title>
+    <title>Hackathon Database</title>
     <meta name="description" content="Find upcoming hackathons!" />
 </svelte:head>
 
 
 
+<!-- Header Bar -->
+    <div class="header-bar bg-white py-4 shadow-md">
+        <div class="container mx-auto px-4">
+            <h1 class="text-2xl font-bold text-blue-900">HackathonDB</h1>
+        </div>
+    </div>
+
+
+
+
+    <!-- Hero Section -->
+    <div class="flex flex-col items-center justify-center h-auto bg-gradient-to-r from-blue-100 via-blue-200 to-blue-300 text-center">
+        <h2 class="text-6xl font-extrabold text-blue-900 mb-8 pt-32 px-4">
+            The best place to find hackathons
+        </h2>
+<div class="w-full max-w-md pb-28 px-4 pt-6">
+
+
+    <div class="relative mb-2">
+        <input
+            type="text"
+            placeholder="Enter your email"
+            class="border p-4 w-full rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 pr-24"
+            style="padding-right: 80px;"
+        />
+        <button class="absolute right-0 top-0 h-full custom-button">
+            Submit
+        </button>
+    </div>
+    <p class="text-gray-500 text-sm mb-6">Get updates on the future of HackathonDB 🚀 no spam, pinky promise 🥺</p>
+
+
+        <div class="relative mb-2">
+        <input
+            type="text"
+            placeholder="Input a new hackathon..."
+            class="border p-4 w-full rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 pr-24"
+            style="padding-right: 80px;"
+        />
+        <button class="absolute right-0 top-0 h-full custom-button">
+            Submit
+        </button>
+    </div>
+    <p class="text-gray-500 text-sm mb-6">Know a hackathon that’s missing? Please share it! 🤩</p>
+
+</div>
+    </div>
+
+
 <div class="p-4">
+
 
     <input
         type="text"
@@ -92,5 +166,10 @@
             <HackathonCard {hackathon} />
         </div>
     {/each}
+
+    {#if $filteredHackathons.length < 3}
+        <div class="h-96"></div>
+    {/if}
 </div>
+
 </div>
