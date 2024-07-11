@@ -137,8 +137,7 @@
     </div>
 
 
-<div class="p-4">
-
+<div class="p-4 min-h-screen">
 
     <input
         type="text"
@@ -167,9 +166,6 @@
         </div>
     {/each}
 
-    {#if $filteredHackathons.length < 3}
-        <div class="h-96"></div>
-    {/if}
 </div>
 
 </div>
