@@ -33,7 +33,7 @@
         <p class="text-gray-600">{hackathon.location.city}, {hackathon.location.country}</p>
         <p class="text-gray-600">Start Date: {formatDate(hackathon.date.start_date)}</p>
         <p class="text-gray-600">End Date: {formatDate(hackathon.date.end_date)}</p>
-        <a href={hackathon.URL} class="text-blue-500 hover:underline mt-2 block">Website</a>
+        <a href={hackathon.URL} class="text-blue-500 hover:underline mt-2 block"  target="_blank" rel="noopener noreferrer">Website</a>
         <div class="flex items-center mt-2">
             <div class={`w-3 h-3 rounded-full ${getStatusClass(hackathon.status)} mr-2`}></div>
             <p class="text-gray-600">Status: {hackathon.status.replace('_', ' ')}</p>

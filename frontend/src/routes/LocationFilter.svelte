@@ -133,7 +133,8 @@ How to add nice shadow to the bottom of dropdown:
     closeListOnChange={false}
     --list-max-height="10000px"
     on:select={e => handleChange(e, 'country')}
-    on:clear={e => handleChange(e, 'country')}>
+    on:clear={e => handleChange(e, 'country')}
+    placeholder="Select countries">
     <div class="item" slot="item" let:item>
         <label for={item.value}>
             <input type="checkbox" id={item.value} bind:checked={isCheckedCountry[item.value]} />
@@ -157,7 +158,9 @@ How to add nice shadow to the bottom of dropdown:
     --list-max-height="10000px"
     on:select={e => handleChange(e, 'city')}
     on:clear={e => handleChange(e, 'city')}
+    placeholder= {!checkedCountries.length ? "Select a country first to show cities" : "Select cities"}
     disabled={!checkedCountries.length}>
+
     <div class="item" slot="item" let:item>
         <label for={item.value}>
             <input type="checkbox" id={item.value} bind:checked={isCheckedCity[item.value]} />
