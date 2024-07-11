@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { HackathonCard } from '../lib';
+    import { HackathonCard, InputWithSubmit } from '../lib';
     import { writable, derived } from 'svelte/store';
     import LocationFilter from './LocationFilter.svelte';
     import StatusFilter from './StatusFilter.svelte';
@@ -54,6 +54,15 @@
         selectedStatuses.set(event.detail.statuses);
     }
 
+    function handleEmailSubmit() {
+    // Handle email submit logic here
+    console.log("Email submitted");
+  }
+
+  function handleHackathonSubmit() {
+    // Handle hackathon submit logic here
+    console.log("Hackathon submitted");
+  }
 
 </script>
 
@@ -103,35 +112,22 @@
         <h2 class="text-6xl font-extrabold text-blue-900 mb-8 pt-32 px-4">
             The best place to find hackathons
         </h2>
+
 <div class="w-full max-w-md pb-28 px-4 pt-6">
 
+    <InputWithSubmit
+      placeholder="Enter your email"
+      buttonText="Submit"
+      description="Get updates on the future of HackathonDB 🚀 no spam, pinky promise 🥺"
+      onSubmit={handleEmailSubmit}
+    />
 
-    <div class="relative mb-2">
-        <input
-            type="text"
-            placeholder="Enter your email"
-            class="border p-4 w-full rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 pr-24"
-            style="padding-right: 80px;"
-        />
-        <button class="absolute right-0 top-0 h-full custom-button">
-            Submit
-        </button>
-    </div>
-    <p class="text-gray-500 text-sm mb-6">Get updates on the future of HackathonDB 🚀 no spam, pinky promise 🥺</p>
-
-
-        <div class="relative mb-2">
-        <input
-            type="text"
-            placeholder="Input a new hackathon..."
-            class="border p-4 w-full rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 pr-24"
-            style="padding-right: 80px;"
-        />
-        <button class="absolute right-0 top-0 h-full custom-button">
-            Submit
-        </button>
-    </div>
-    <p class="text-gray-500 text-sm mb-6">Know a hackathon that’s missing? Please share it! 🤩</p>
+    <InputWithSubmit
+      placeholder="Input a new hackathon..."
+      buttonText="Submit"
+      description="Know a hackathon that’s missing? Please share it! 🤩"
+      onSubmit={handleHackathonSubmit}
+    />
 
 </div>
     </div>
