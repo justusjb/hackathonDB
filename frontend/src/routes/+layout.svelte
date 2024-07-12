@@ -26,7 +26,7 @@
 <div class="header-bar bg-white dark:bg-gray-800 py-4 shadow-md">
   <div class="container mx-auto px-4 flex items-center justify-between">
     <h1 class="text-2xl font-bold text-blue-900 dark:text-white">HackathonDB</h1>
-    <button on:click={toggleDarkMode} class="p-2 border rounded text-black dark:text-white">
+    <button on:click={toggleDarkMode} class="p-1.5 border rounded text-black dark:text-white text-sm">
     {#if isDarkMode}
       Switch to Light Mode
     {:else}

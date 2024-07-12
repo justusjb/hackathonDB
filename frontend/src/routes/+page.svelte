@@ -74,17 +74,11 @@
 </svelte:head>
 
 
-
-
-
-
-
-
-    <!-- Landing page Section -->
-    <div class="flex flex-col items-center justify-center h-auto bg-gradient-to-r from-blue-100 via-blue-200 to-blue-300 text-center">
-        <h2 class="text-6xl font-extrabold text-blue-900 mb-8 pt-32 px-4">
-            The best place to find hackathons
-        </h2>
+<!-- Landing page Section -->
+<div class="flex flex-col items-center justify-center h-auto bg-gradient-to-r from-blue-100 via-blue-200 to-blue-300 dark:from-gray-700 dark:via-gray-800 dark:to-gray-900 text-center">
+  <h2 class="text-6xl font-extrabold text-blue-900 dark:text-white mb-8 pt-32 px-4">
+    The best place to find hackathons
+  </h2>
 
 <div class="w-full max-w-md pb-28 px-4 pt-6">
 
