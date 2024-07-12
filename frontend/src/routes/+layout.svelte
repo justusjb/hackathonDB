@@ -23,11 +23,10 @@
 </script>
 
 <!-- Header Bar -->
-    <div class="header-bar bg-white py-4 shadow-md dark:bg-black">
-        <div class="container mx-auto px-4">
-            <h1 class="text-2xl font-bold text-blue-900">HackathonDB</h1>
-
-            <button on:click={toggleDarkMode} class="m-4 p-2 border rounded">
+<div class="header-bar bg-white dark:bg-gray-800 py-4 shadow-md">
+  <div class="container mx-auto px-4 flex items-center justify-between">
+    <h1 class="text-2xl font-bold text-blue-900 dark:text-white">HackathonDB</h1>
+    <button on:click={toggleDarkMode} class="p-2 border rounded text-black dark:text-white">
     {#if isDarkMode}
       Switch to Light Mode
     {:else}
