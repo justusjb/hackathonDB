@@ -4,6 +4,7 @@
     import LocationFilter from './LocationFilter.svelte';
     import StatusFilter from './StatusFilter.svelte';
 
+
     type Hackathon = {
         name: string;
         date: { start_date: string; end_date: string };
@@ -67,29 +68,6 @@
 </script>
 
 
-<style>
-    .custom-button {
-        background-color: #1E3A8A; /* Darker blue color */
-        border: 2px solid #1E3A8A; /* Matching border color */
-        color: white;
-        border-radius: 0 0.5rem 0.5rem 0; /* Adjusted border-radius to match input */
-        padding: 0.5rem 1rem;
-        transition: background-color 0.3s, border-color 0.3s; /* Smooth transition */
-    }
-
-    .custom-button:hover {
-        background-color: #1D4ED8; /* Slightly lighter blue on hover */
-        border-color: #1D4ED8; /* Matching border color on hover */
-    }
-
-    .custom-button:focus {
-        outline: none;
-        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5); /* Focus ring */
-    }
-</style>
-
-
-
 <svelte:head>
     <title>Hackathon Database</title>
     <meta name="description" content="Find upcoming hackathons!" />
@@ -97,17 +75,12 @@
 
 
 
-<!-- Header Bar -->
-    <div class="header-bar bg-white py-4 shadow-md">
-        <div class="container mx-auto px-4">
-            <h1 class="text-2xl font-bold text-blue-900">HackathonDB</h1>
-        </div>
-    </div>
 
 
 
 
-    <!-- Hero Section -->
+
+    <!-- Landing page Section -->
     <div class="flex flex-col items-center justify-center h-auto bg-gradient-to-r from-blue-100 via-blue-200 to-blue-300 text-center">
         <h2 class="text-6xl font-extrabold text-blue-900 mb-8 pt-32 px-4">
             The best place to find hackathons
@@ -132,7 +105,7 @@
 </div>
     </div>
 
-
+<!-- Hackathon finding Section -->
 <div class="p-4 min-h-screen">
 
     <input
