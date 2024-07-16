@@ -6,7 +6,6 @@
 
   darkMode.subscribe((value:boolean) => {
     isDarkMode = value;
-      console.log(isDarkMode)
   });
 
   function toggleDarkMode() {
@@ -23,6 +22,7 @@
 </script>
 
 <!-- Header Bar -->
+<div class="min-h-screen">
 <div class="header-bar bg-white dark:bg-gray-800 py-4 shadow-md">
   <div class="container mx-auto px-4 flex items-center justify-between">
     <h1 class="text-2xl font-bold text-blue-900 dark:text-white">HackathonDB</h1>
@@ -38,4 +38,7 @@
     </div>
 
 
-<slot/>
+  <main class="flex-1 overflow-auto">
+    <slot />
+  </main>
+</div>

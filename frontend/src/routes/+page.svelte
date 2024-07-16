@@ -13,7 +13,13 @@
         status: string;
     };
 
-    export let data: { hackathons: Hackathon[] };
+
+    //export let data: { hackathons: Hackathon[] };
+    //export let error: string | null;
+
+    export let data: { hackathons: Hackathon[]; error: string | null };
+
+    const { hackathons, error } = data;
 
     const filterText = writable('');
     const selectedStatuses = writable<Set<string>>(new Set());
@@ -73,6 +79,18 @@
     <meta name="description" content="Find upcoming hackathons!" />
 </svelte:head>
 
+{#if error}
+    <div class="h-full bg-gray-100 dark:bg-gray-900">
+
+<div class="flex-grow p-4">
+    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+        <strong class="font-bold">Error:</strong>
+        <span class="block sm:inline">{error}</span>
+    </div>
+</div>
+        </div>
+
+{:else}
 
 <!-- Landing page Section -->
 <div class="flex flex-col items-center justify-center h-auto bg-gradient-to-r from-blue-100 via-blue-200 to-blue-300 dark:from-gray-700 dark:via-gray-800 dark:to-gray-900 text-center">
@@ -100,7 +118,7 @@
     </div>
 
 <!-- Hackathon finding Section -->
-<div class="p-4 min-h-screen">
+<div class="p-4 bg-white dark:bg-gray-900">
 
     <input
         type="text"
@@ -117,10 +135,15 @@
         on:filterUpdate={handleLocationFilterUpdate}
     />
 
+    <div class="min-h-screen">
 <div class="grid grid-cols-1 gap-4 justify-items-center">
     {#if data.hackathons.length === 0}
         <div class="flex justify-center items-center h-full">
             <p>No hackathons available.</p>
+        </div>
+    {:else if $filteredHackathons.length === 0}
+        <div class="flex justify-center items-center h-full">
+            <p>No hackathons match the selected filters.</p>
         </div>
     {/if}
     {#each $filteredHackathons as hackathon}
@@ -128,7 +151,8 @@
             <HackathonCard {hackathon} />
         </div>
     {/each}
-
+</div>
+</div>
 </div>
 
-</div>
+{/if}
