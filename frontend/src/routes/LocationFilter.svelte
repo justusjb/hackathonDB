@@ -119,6 +119,9 @@ function updateFilters() {
   $: borderColor = isDarkMode ? 'rgb(75, 85, 99)' : 'rgb(209, 213, 219)';
   $: textColor = isDarkMode ? 'rgb(243, 244, 246)' : 'rgb(17, 24, 39)';
   $: placeholderColor = isDarkMode ? 'rgb(156, 163, 175)' : 'rgb(107, 114, 128)';
+  //$: borderColor = isDarkMode ? 'rgb(75, 85, 99)' : 'rgb(229, 231, 235)';
+  $: borderHoverColor = isDarkMode ? 'rgb(107, 114, 128)' : 'rgb(107, 114, 128)';
+  $: borderFocusColor = 'rgb(96, 165, 250)';
 
   $: inputStyles = `
     background-color: ${backgroundColor};
@@ -209,11 +212,12 @@ inputStyles={inputStyles}
 --background={backgroundColor}
         --chevron-background = 'rgb(128, 128, 255)'
 
---border= '1px solid rgb(255, 0, 255)'
-        --border-hover= '1px solid rgb(0, 0, 219)'
-        --border-focused= '1px solid rgb(255, 213, 0)'
+        --border= '1px solid {borderColor}'
+        --border-hover= '1px solid {borderHoverColor}'
+        --border-focused= '1px solid {borderFocusColor}'
         --input-color={textColor}
         --item-color={textColor}
+        --item-hover-color={textColor}
         --placeholder-color={placeholderColor}
         --item-hover-bg={isDarkMode ? 'rgb(55, 65, 81)' : 'rgb(243, 244, 246)'}
         --item-is-active-bg={isDarkMode ? 'rgb(30, 58, 138)' : 'rgb(219, 234, 254)'}
