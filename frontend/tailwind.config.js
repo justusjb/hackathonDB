@@ -7,11 +7,15 @@ export default {
       boxShadow: {
         'none': 'none',
       },
+      screens: {
+        'betterhover': {'raw': '(hover: hover)'},
+      },
     },
   },
   plugins: [
     require('@tailwindcss/forms')({
       strategy: 'class',
     }),
+      require('daisyui')
   ],
 }

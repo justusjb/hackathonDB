@@ -62,14 +62,14 @@
         selectedStatuses.set(event.detail.statuses);
     }
 
-    function handleEmailSubmit() {
+    function handleEmailSubmit(value: string) {
     // Handle email submit logic here
-    console.log("Email submitted");
+    console.log("Email submitted:", value);
   }
 
-  function handleHackathonSubmit() {
+  function handleHackathonSubmit(value: string) {
     // Handle hackathon submit logic here
-    console.log("Hackathon submitted");
+    console.log("Hackathon submitted:", value);
   }
 
 
@@ -170,7 +170,7 @@
 <input
   type="text"
   placeholder="Search hackathons..."
-  class="w-full p-2 mb-4 border rounded focus:outline-none"
+  class="w-full p-2 border rounded focus:outline-none"
   on:input={handleInput}
   style={inputStyles}
   style:--placeholder-color={placeholderColor}

@@ -35,27 +35,37 @@
     });
 </script>
 
-<div class="mb-4">
-    <label class="inline-flex items-center mr-4">
-        <input type="checkbox" class="form-checkbox text-yellow-500 h-5 w-5" bind:checked={$announcedChecked} on:change={() => toggleStatus('announced')}>
-        <span class="ml-0.5 text-gray-700 dark:text-gray-400">Announced</span>
-    </label>
-    <label class="inline-flex items-center mr-4">
-        <input type="checkbox" class="form-checkbox text-green-600 h-5 w-5" bind:checked={$applicationsOpenChecked} on:change={() => toggleStatus('applications_open')}>
-        <span class="ml-0.5 text-gray-700  dark:text-gray-400">Applications Open</span>
-    </label>
-    <label class="inline-flex items-center mr-4">
-        <input type="checkbox" class="form-checkbox text-red-600 h-5 w-5" bind:checked={$applicationsClosedChecked} on:change={() => toggleStatus('applications_closed')}>
-        <span class="ml-0.5 text-gray-700  dark:text-gray-400">Applications Closed</span>
-    </label>
-    <label class="inline-flex items-center mr-4">
-        <input type="checkbox" class="form-checkbox text-gray-400 h-5 w-5" bind:checked={$expectedChecked} on:change={() => toggleStatus('expected')}>
-        <span class="ml-0.5 text-gray-700 dark:text-gray-400">Expected</span>
-    </label>
+<div class="flex flex-wrap gap-4 my-2">
+    <div class="form-control">
+        <label class="label cursor-pointer">
+            <input type="checkbox" class="checkbox checkbox-warning mr-2"
+                   bind:checked={$announcedChecked}
+                   on:change={() => toggleStatus('announced')}/>
+            <span class="label-text text-gray-800 dark:text-gray-200">Announced</span>
+        </label>
+    </div>
+    <div class="form-control">
+        <label class="label cursor-pointer">
+            <input type="checkbox" class="checkbox checkbox-success mr-2"
+                   bind:checked={$applicationsOpenChecked}
+                   on:change={() => toggleStatus('applications_open')}/>
+            <span class="label-text text-gray-800 dark:text-gray-200">Applications Open</span>
+        </label>
+    </div>
+    <div class="form-control">
+        <label class="label cursor-pointer">
+            <input type="checkbox" class="checkbox checkbox-error mr-2"
+                   bind:checked={$applicationsClosedChecked}
+                   on:change={() => toggleStatus('applications_closed')}/>
+            <span class="label-text text-gray-800 dark:text-gray-200">Applications Closed</span>
+        </label>
+    </div>
+    <div class="form-control">
+        <label class="label cursor-pointer">
+            <input type="checkbox" class="checkbox checkbox-neutral border-gray-600 dark:border-gray-600 mr-2"
+                   bind:checked={$expectedChecked}
+                   on:change={() => toggleStatus('expected')}/>
+            <span class="label-text text-gray-800 dark:text-gray-200">Expected</span>
+        </label>
+    </div>
 </div>
-
-<style>
-    .form-checkbox {
-        margin-right: 8px;
-    }
-</style>

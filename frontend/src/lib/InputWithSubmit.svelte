@@ -1,84 +1,67 @@
-<script>
+<script lang="ts">
+  import * as acorn from "acorn";
+
   export let placeholder = "";
   export let buttonText = "Submit";
-  export let inputType = "text";
   export let description = "";
-  export let onSubmit = () => {};
+
+  let inputValue = "";
+
+  //export let onSubmit = () => {};
+  export let onSubmit = (value: string) => {value};
+
+
+  let inputElement: any;
+  let isButtonClicked = true;
+  let isButtonAnimating = false;
+
+  function handleMousedown() {
+    isButtonClicked = true;
+    if (inputElement) {
+      inputElement.blur();
+    }
+    animateButton();
+  }
+
+    function handleButtonclick() {
+        if (inputValue.trim()) {
+        onSubmit(inputValue);
+        inputValue = "";
+      }
+    }
+
+  function handleInputFocus() {
+    isButtonClicked = false;
+  }
+
+  function animateButton() {
+    isButtonAnimating = true;
+    setTimeout(() => {
+      isButtonAnimating = false;
+    }, 100); // Match this duration with the CSS transition duration
+  }
 </script>
 
-<div class="relative mb-2">
-  <input
-    type={inputType}
-    placeholder={placeholder}
-    class="border p-4 w-full rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 pr-24 dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-400"
-  />
-  <button
-    class="absolute right-0 top-0 h-full custom-button bg-blue-900 text-white border-blue-900 hover:bg-blue-700 hover:border-blue-700 focus:outline-none dark:bg-gray-600 dark:border-gray-600 dark:text-white dark:hover:bg-gray-500 dark:hover:border-gray-500"
-    on:click={onSubmit}
-  >
-    {buttonText}
-  </button>
+<div class="mb-2">
+  <div class="join w-full rounded-lg {isButtonClicked ? '' : 'focus-within:ring-2 focus-within:ring-blue-400 dark:focus-within:ring-gray-400'} overflow-hidden">
+    <input
+      bind:this={inputElement}
+      bind:value={inputValue}
+      type="text"
+      placeholder={placeholder}
+      on:focus={handleInputFocus}
+
+      class="input join-item w-full pr-4 focus:outline-none border-r-0 focus:border-transparent text-black bg-white dark:bg-gray-800 dark:border-gray-600 dark:focus:border-transparent dark:placeholder-gray-400 dark:text-white"
+    />
+    <button
+      class="btn join-item rounded-r-lg bg-blue-900 disabled:bg-blue-900 disabled:text-white text-white border-blue-900 betterhover:hover:bg-blue-700 betterhover:hover:border-blue-700 focus:outline-none dark:bg-gray-600 dark:border-gray-600 dark:text-white dark:betterhover:hover:bg-gray-500 dark:betterhover:hover:border-gray-500 transition-transform duration-100 {isButtonAnimating ? 'scale-95' : ''}"
+      on:mousedown={handleMousedown}
+      on:click={handleButtonclick}
+      disabled={!inputValue.trim()}
+    >
+      {buttonText}
+    </button>
+  </div>
 </div>
 <p class="text-gray-500 dark:text-gray-400 text-sm mb-6">{description}</p>
 
-<style>
-
-    .custom-button {
-        border-radius: 0 0.5rem 0.5rem 0;
-        border: 2px solid transparent;
-        padding: 0.5rem 1rem;
-        transition: background-color 0.3s, border-color 0.3s;
-    }
-
-    .custom-button:focus {
-        outline: none;
-
-    }
-
-</style>
-
-
-
-<!--
-
-<div class="relative mb-2">
-  <input
-    type={inputType}
-    placeholder={placeholder}
-    class="border p-4 w-full rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 pr-24"
-    style="padding-right: 80px;"
-  />
-  <button class="absolute right-0 top-0 h-full custom-button" on:click={onSubmit}>
-    {buttonText}
-  </button>
-</div>
-<p class="text-gray-500 text-sm mb-6">{description}</p>
-
-<style>
-    .custom-button {
-        background-color: #1E3A8A;
-        border: 2px solid #1E3A8A;
-        color: white;
-        border-radius: 0 0.5rem 0.5rem 0;
-        padding: 0.5rem 1rem;
-        transition: background-color 0.3s, border-color 0.3s;
-    }
-
-    .custom-button:hover {
-        background-color: #1D4ED8;
-        border-color: #1D4ED8;
-    }
-
-    .custom-button:focus {
-        outline: none;
-        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
-    }
-</style>
-
-
-
-
-
-
-
--->
