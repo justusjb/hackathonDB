@@ -3,6 +3,7 @@
     import { writable, derived } from 'svelte/store';
     import LocationFilter from './LocationFilter.svelte';
     import StatusFilter from './StatusFilter.svelte';
+    import { darkMode } from '../stores/darkMode.js';
 
 
     type Hackathon = {

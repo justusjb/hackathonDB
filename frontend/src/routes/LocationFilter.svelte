@@ -122,9 +122,9 @@ function updateFilters() {
   //$: borderColor = isDarkMode ? 'rgb(75, 85, 99)' : 'rgb(229, 231, 235)';
   $: borderHoverColor = isDarkMode ? 'rgb(107, 114, 128)' : 'rgb(107, 114, 128)';
   $: borderFocusColor = 'rgb(96, 165, 250)';
+  $: disbg = !checkedCountries.length ? backgroundColor : backgroundColor;
 
   $: inputStyles = `
-    background-color: ${backgroundColor};
     border-color: ${borderColor};
     color: ${textColor};
   `;
@@ -204,12 +204,13 @@ How to add nice shadow to the bottom of dropdown:
 -->
 
 <div class="mb-4">
-    <h3 class="font-bold mb-2">Countries</h3>
+    <h3 class="font-bold mb-2 {isDarkMode ? 'text-gray-300' : 'text-black'}">Countries</h3>
     <div >
     <Select
             class="custom-select"
 inputStyles={inputStyles}
 --background={backgroundColor}
+
         --chevron-background = 'rgb(128, 128, 255)'
 
         --border= '1px solid {borderColor}'
@@ -220,12 +221,12 @@ inputStyles={inputStyles}
         --item-hover-color={textColor}
         --placeholder-color={placeholderColor}
         --item-hover-bg={isDarkMode ? 'rgb(55, 65, 81)' : 'rgb(243, 244, 246)'}
-        --item-is-active-bg={isDarkMode ? 'rgb(30, 58, 138)' : 'rgb(219, 234, 254)'}
-        --item-is-active-color={isDarkMode ? 'rgb(191, 219, 254)' : 'rgb(30, 58, 138)'}
         --list-background={backgroundColor}
         --list-border={borderColor}
-        --multi-item-bg={isDarkMode ? 'rgb(30, 58, 138)' : 'rgb(219, 234, 254)'}
-        --multi-item-color={isDarkMode ? 'rgb(191, 219, 254)' : 'rgb(30, 58, 138)'}
+        --multi-item-bg={borderColor}
+        --multi-item-color={textColor}
+            --multi-item-outline={borderColor}
+
 items={countries}
     bind:value={valueCountry}
     multiple={true}
@@ -249,8 +250,33 @@ items={countries}
 </div>
 
 <div class="mb-4">
-    <h3 class="font-bold mb-2">Cities</h3>
+    <h3 class="font-bold mb-2 {isDarkMode ? 'text-gray-300' : 'text-black'}">Cities</h3>
 <Select
+        class="custom-select"
+inputStyles={inputStyles}
+--background={disbg}
+        --chevron-background = 'rgb(128, 128, 255)'
+
+        --border= '1px solid {borderColor}'
+        --border-hover= '1px solid {borderHoverColor}'
+        --border-focused= '1px solid {borderFocusColor}'
+        --input-color={textColor}
+        --item-color={textColor}
+        --item-hover-color={textColor}
+        --placeholder-color={placeholderColor}
+        --item-hover-bg={isDarkMode ? 'rgb(55, 65, 81)' : 'rgb(243, 244, 246)'}
+        --list-background={backgroundColor}
+        --list-border={borderColor}
+        --multi-item-bg={borderColor}
+        --multi-item-color={textColor}
+            --multi-item-outline={borderColor}
+        --disabled-color="rgb(255, 0, 0)"
+        --disabled-background={isDarkMode ? "rgb(55, 65, 81)" : "rgb(229, 231, 235)"}
+        --disabled-placeholder-color={placeholderColor}
+        --disabled-border-color={borderColor}
+
+
+
     items={availableCities}
     bind:value={valueCity}
     multiple={true}
@@ -273,3 +299,5 @@ items={countries}
     <span class="text-sm text-gray-500 mt-1">All cities selected</span>
 {/if}
 </div>
+
+<!-- --item-is-active-bg={isDarkMode ? 'rgb(30, 58, 138)' : 'rgb(219, 234, 254)'} -->
