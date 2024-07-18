@@ -86,7 +86,6 @@
     background-color: ${backgroundColor};
     border-color: ${borderColor};
     color: ${textColor};
-    transition: border-color 0.2s ease-in-out;
   `;
 
   function handleFocus(event:any) {

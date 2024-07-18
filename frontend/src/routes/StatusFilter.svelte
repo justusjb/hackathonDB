@@ -38,19 +38,19 @@
 <div class="mb-4">
     <label class="inline-flex items-center mr-4">
         <input type="checkbox" class="form-checkbox text-yellow-500 h-5 w-5" bind:checked={$announcedChecked} on:change={() => toggleStatus('announced')}>
-        <span class="ml-2 text-gray-700 dark:text-gray-400">Announced</span>
+        <span class="ml-0.5 text-gray-700 dark:text-gray-400">Announced</span>
     </label>
     <label class="inline-flex items-center mr-4">
         <input type="checkbox" class="form-checkbox text-green-600 h-5 w-5" bind:checked={$applicationsOpenChecked} on:change={() => toggleStatus('applications_open')}>
-        <span class="ml-2 text-gray-700  dark:text-gray-400">Applications Open</span>
+        <span class="ml-0.5 text-gray-700  dark:text-gray-400">Applications Open</span>
     </label>
     <label class="inline-flex items-center mr-4">
         <input type="checkbox" class="form-checkbox text-red-600 h-5 w-5" bind:checked={$applicationsClosedChecked} on:change={() => toggleStatus('applications_closed')}>
-        <span class="ml-2 text-gray-700  dark:text-gray-400">Applications Closed</span>
+        <span class="ml-0.5 text-gray-700  dark:text-gray-400">Applications Closed</span>
     </label>
     <label class="inline-flex items-center mr-4">
         <input type="checkbox" class="form-checkbox text-gray-400 h-5 w-5" bind:checked={$expectedChecked} on:change={() => toggleStatus('expected')}>
-        <span class="ml-2 text-gray-700 dark:text-gray-400">Expected</span>
+        <span class="ml-0.5 text-gray-700 dark:text-gray-400">Expected</span>
     </label>
 </div>
 
