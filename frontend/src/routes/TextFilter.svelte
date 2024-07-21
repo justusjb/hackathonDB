@@ -1,7 +1,10 @@
 <script>
+  import {darkMode} from "../stores/darkMode.js";
+
   export let placeholder = "Search...";
   export let value = "";
-  export let isDarkMode = false;
+
+  $: isDarkMode = $darkMode;
 
   $: backgroundColor = isDarkMode ? 'rgb(31, 41, 55)' : 'rgb(255, 255, 255)';
   $: borderColor = isDarkMode ? 'rgb(75, 85, 99)' : 'rgb(209, 213, 219)';
@@ -21,10 +24,11 @@
   }
 </script>
 
+<div class="mb-4">
+    <h3 class="font-bold mb-2 {isDarkMode ? 'text-gray-300' : 'text-black'}">Text Search</h3>
 <div
   class="custom-select svelte-select-wrapper"
   class:focused={isFocused}
-  role="combobox"
   aria-haspopup="listbox"
   aria-expanded="false"
   style="
@@ -48,6 +52,7 @@
         on:blur={handleBlur}
       />
     </div>
+</div>
 </div>
 
 <style>
@@ -88,8 +93,8 @@
 .value-container {
   align-items: center;
   display: flex;
-  flex: 1 1 0%;
-  padding: 0px 16px;
+  flex: 1 1 0;
+  padding: 0 16px;
   position: relative;
   overflow: hidden;
   box-sizing: border-box;

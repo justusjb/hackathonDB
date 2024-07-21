@@ -130,7 +130,6 @@
 
 <TextFilter
   placeholder="Search hackathons"
-  isDarkMode={$darkMode}
   on:input={handleInput}
 />
 

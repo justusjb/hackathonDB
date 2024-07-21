@@ -30,7 +30,7 @@
 
 <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden m-4">
     <div class="p-4">
-        <h2 class="text-2xl font-bold mb-2 text-gray-800 dark:text-white">{hackathon.name}</h2>
+        <h2 class="text-2xl font-bold mb-2 text-gray-800 dark:text-gray-300">{hackathon.name}</h2>
         <p class="text-gray-600 dark:text-gray-300">{hackathon.location.city}, {hackathon.location.country}</p>
         <p class="text-gray-600 dark:text-gray-300">Start Date: {formatDate(hackathon.date.start_date)}</p>
         <p class="text-gray-600 dark:text-gray-300">End Date: {formatDate(hackathon.date.end_date)}</p>
