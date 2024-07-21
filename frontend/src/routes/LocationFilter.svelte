@@ -127,6 +127,7 @@ function updateFilters() {
   $: inputStyles = `
     border-color: ${borderColor};
     color: ${textColor};
+    transition: border-color 0.1s;
   `;
 
 </script>

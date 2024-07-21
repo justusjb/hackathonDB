@@ -3,6 +3,7 @@
     import { writable, derived } from 'svelte/store';
     import LocationFilter from './LocationFilter.svelte';
     import StatusFilter from './StatusFilter.svelte';
+    import TextFilter from "./TextFilter.svelte";
     import { darkMode } from '../stores/darkMode.js';
 
 
@@ -121,8 +122,8 @@
 </script>
 
 <style>
-  input::placeholder {
-    color: var(--placeholder-color);
+  :global(.custom-select.svelte-select-wrapper:hover) {
+    border: var(--border-hover) !important;
   }
 </style>
 
@@ -173,13 +174,10 @@
 <!-- Hackathon finding Section -->
 <div class="p-4 bg-white dark:bg-gray-900">
 
-<input
-  type="text"
+<TextFilter
   placeholder="Search hackathons..."
-  class="w-full border rounded-md focus:outline-none"
+  isDarkMode={$darkMode}
   on:input={handleInput}
-  style={inputStyles}
-  style:--placeholder-color={placeholderColor}
   on:focus={handleFocus}
   on:blur={handleBlur}
   on:mouseenter={handleMouseEnter}
