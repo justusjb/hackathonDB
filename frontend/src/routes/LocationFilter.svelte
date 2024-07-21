@@ -119,7 +119,7 @@ function updateFilters() {
   $: textColor = isDarkMode ? 'rgb(243, 244, 246)' : 'rgb(17, 24, 39)';
   $: placeholderColor = isDarkMode ? 'rgb(156, 163, 175)' : 'rgb(107, 114, 128)';
   //$: borderColor = isDarkMode ? 'rgb(75, 85, 99)' : 'rgb(229, 231, 235)';
-  $: borderHoverColor = isDarkMode ? 'rgb(107, 114, 128)' : 'rgb(107, 114, 128)';
+  $: borderHoverColor = isDarkMode ? 'rgb(107, 114, 128)' : 'rgb(156, 163, 175)';
   $: borderFocusColor = 'rgb(96, 165, 250)';
   $: disbg = !checkedCountries.length ? backgroundColor : backgroundColor;
   $: cityBorder = `1px solid ${!checkedCountries.length ? borderColor : borderHoverColor}`;

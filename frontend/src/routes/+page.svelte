@@ -101,13 +101,12 @@
 {:else}
 
 <!-- Landing page Section -->
-<div class="flex flex-col items-center justify-center h-auto bg-gradient-to-r from-blue-100 via-blue-200 to-blue-300 dark:from-gray-700 dark:via-gray-800 dark:to-gray-900 text-center">
-  <h2 class="text-6xl font-extrabold text-blue-900 dark:text-white mb-8 pt-32 px-4">
+<div class="flex flex-col items-center justify-center bg-gradient-to-r from-blue-100 via-blue-200 to-blue-300 dark:from-gray-700 dark:via-gray-800 dark:to-gray-900 text-center pb-6 pt-12 sm:pb-10 sm:pt-16 md:pb-12 md:pt-24 lg:pb-20 lg:pt-36">
+  <h2 class="text-4xl sm:text-5xl md:text-6xl lg:text-6xl font-extrabold text-blue-900 dark:text-white mb-4 sm:mb-6 md:mb-8 px-4">
     The best place to find hackathons
   </h2>
 
-<div class="w-full max-w-md pb-28 px-4 pt-6">
-
+  <div class="w-full max-w-md px-4 py-4 sm:py-6 md:py-8">
     <InputWithSubmit
       placeholder="Enter your email"
       buttonText="Submit"
@@ -115,15 +114,16 @@
       onSubmit={handleEmailSubmit}
     />
 
-    <InputWithSubmit
-      placeholder="Input a new hackathon..."
-      buttonText="Submit"
-      description="Know a hackathon that’s missing? Please share it! 🤩"
-      onSubmit={handleHackathonSubmit}
-    />
-
-</div>
+    <div class="mt-4 sm:mt-6 md:mt-8">
+      <InputWithSubmit
+        placeholder="Input a new hackathon..."
+        buttonText="Submit"
+        description="Know a hackathon that's missing? Please share it! 🤩"
+        onSubmit={handleHackathonSubmit}
+      />
     </div>
+  </div>
+</div>
 
 <!-- Hackathon finding Section -->
 <div class="p-4 bg-white dark:bg-gray-900">
