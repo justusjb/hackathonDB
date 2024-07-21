@@ -1,7 +1,6 @@
 <script lang="ts">
     import { createEventDispatcher } from 'svelte';
     import Select from 'svelte-select';
-    import {browser} from "$app/environment";
     import { darkMode } from '../stores/darkMode.js';
 
 
@@ -123,6 +122,7 @@ function updateFilters() {
   $: borderHoverColor = isDarkMode ? 'rgb(107, 114, 128)' : 'rgb(107, 114, 128)';
   $: borderFocusColor = 'rgb(96, 165, 250)';
   $: disbg = !checkedCountries.length ? backgroundColor : backgroundColor;
+  $: cityBorder = `1px solid ${!checkedCountries.length ? borderColor : borderHoverColor}`;
 
   $: inputStyles = `
     border-color: ${borderColor};
@@ -261,7 +261,7 @@ inputStyles={inputStyles}
         --chevron-background = 'rgb(128, 128, 255)'
 
         --border= '1px solid {borderColor}'
-        --border-hover= '1px solid {borderHoverColor}'
+        --border-hover={cityBorder}
         --border-focused= '1px solid {borderFocusColor}'
         --input-color={textColor}
         --item-color={textColor}
