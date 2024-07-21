@@ -73,52 +73,6 @@
     console.log("Hackathon submitted:", value);
   }
 
-
-    $: isDarkMode = $darkMode;
-
-    $: backgroundColor = isDarkMode ? 'rgb(31, 41, 55)' : 'rgb(255, 255, 255)';
-  $: borderColor = isDarkMode ? 'rgb(75, 85, 99)' : 'rgb(209, 213, 219)';
-  $: textColor = isDarkMode ? 'rgb(243, 244, 246)' : 'rgb(17, 24, 39)';
-  $: placeholderColor = isDarkMode ? 'rgb(156, 163, 175)' : 'rgb(107, 114, 128)';
-  $: borderHoverColor = isDarkMode ? 'rgb(107, 114, 128)' : 'rgb(107, 114, 128)';
-  $: borderFocusColor = 'rgb(96, 165, 250)';
-
-  $: inputStyles = `
-    background-color: ${backgroundColor};
-    border-color: ${borderColor};
-    color: ${textColor};
-    border-width: 1px;
-    font-size: 14px;
-    line-height: 1.5;
-    height: 42px;
-    padding: 2px 8px;
-    border-radius: 4px;
-  `;
-
-  function handleFocus(event:any) {
-    if (event.target instanceof HTMLInputElement) {
-      event.target.style.borderColor = borderFocusColor;
-    }
-  }
-
-  function handleBlur(event:any) {
-    if (event.target instanceof HTMLInputElement) {
-      event.target.style.borderColor = borderColor;
-    }
-  }
-
-  function handleMouseEnter(event:any) {
-    if (event.target instanceof HTMLInputElement) {
-      event.target.style.borderColor = borderHoverColor;
-    }
-  }
-
-  function handleMouseLeave(event:any) {
-    if (event.target instanceof HTMLInputElement) {
-      event.target.style.borderColor = borderColor;
-    }
-  }
-
 </script>
 
 <style>
@@ -178,10 +132,6 @@
   placeholder="Search hackathons..."
   isDarkMode={$darkMode}
   on:input={handleInput}
-  on:focus={handleFocus}
-  on:blur={handleBlur}
-  on:mouseenter={handleMouseEnter}
-  on:mouseleave={handleMouseLeave}
 />
 
     <StatusFilter on:statusUpdate={handleStatusFilterUpdate} />
