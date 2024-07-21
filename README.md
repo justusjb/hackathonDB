@@ -1,6 +1,6 @@
 # hackathonDB
 
-This is the place to find all hackthons around the world
+This is the place to find all hackathons around the world
 
 ## The current state of HackathonDB
 
