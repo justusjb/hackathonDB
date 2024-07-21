@@ -86,6 +86,12 @@
     background-color: ${backgroundColor};
     border-color: ${borderColor};
     color: ${textColor};
+    border-width: 1px;
+    font-size: 14px;
+    line-height: 1.5;
+    height: 42px;
+    padding: 2px 8px;
+    border-radius: 4px;
   `;
 
   function handleFocus(event:any) {
@@ -170,7 +176,7 @@
 <input
   type="text"
   placeholder="Search hackathons..."
-  class="w-full p-2 border rounded focus:outline-none"
+  class="w-full border rounded-md focus:outline-none"
   on:input={handleInput}
   style={inputStyles}
   style:--placeholder-color={placeholderColor}

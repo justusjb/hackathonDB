@@ -225,7 +225,7 @@ inputStyles={inputStyles}
         --list-border={borderColor}
         --multi-item-bg={borderColor}
         --multi-item-color={textColor}
-            --multi-item-outline={borderColor}
+        --multi-item-outline={borderColor}
 
 items={countries}
     bind:value={valueCountry}
@@ -246,6 +246,8 @@ items={countries}
         </div>
 {#if !checkedCountries.length}
     <span class="text-sm text-gray-500 mt-1">All countries selected</span>
+{:else}
+    <span class="text-sm text-gray-500 mt-1 invisible">All countries selected</span>
 {/if}
 </div>
 
@@ -269,7 +271,7 @@ inputStyles={inputStyles}
         --list-border={borderColor}
         --multi-item-bg={borderColor}
         --multi-item-color={textColor}
-            --multi-item-outline={borderColor}
+        --multi-item-outline={borderColor}
         --disabled-color="rgb(255, 0, 0)"
         --disabled-background={isDarkMode ? "rgb(55, 65, 81)" : "rgb(229, 231, 235)"}
         --disabled-placeholder-color={placeholderColor}
@@ -297,6 +299,8 @@ inputStyles={inputStyles}
 </Select>
 {#if !checkedCities.length}
     <span class="text-sm text-gray-500 mt-1">All cities selected</span>
+{:else}
+    <span class="text-sm text-gray-500 mt-1 invisible">All cities selected</span>
 {/if}
 </div>
 

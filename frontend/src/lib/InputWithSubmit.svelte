@@ -38,7 +38,7 @@
     isButtonAnimating = true;
     setTimeout(() => {
       isButtonAnimating = false;
-    }, 100); // Match this duration with the CSS transition duration
+    }, 150); // Match this duration with the CSS transition duration
   }
 </script>
 
@@ -54,7 +54,7 @@
       class="input join-item w-full pr-4 focus:outline-none border-r-0 focus:border-transparent text-black bg-white dark:bg-gray-800 dark:border-gray-600 dark:focus:border-transparent dark:placeholder-gray-400 dark:text-white"
     />
     <button
-      class="btn join-item rounded-r-lg bg-blue-900 disabled:bg-blue-900 disabled:text-white text-white border-blue-900 betterhover:hover:bg-blue-700 betterhover:hover:border-blue-700 focus:outline-none dark:bg-gray-600 dark:border-gray-600 dark:text-white dark:betterhover:hover:bg-gray-500 dark:betterhover:hover:border-gray-500 transition-transform duration-100 {isButtonAnimating ? 'scale-95' : ''}"
+      class="btn join-item rounded-r-lg bg-blue-900 disabled:bg-blue-900 disabled:text-white text-white border-blue-900 betterhover:hover:bg-blue-700 betterhover:hover:border-blue-700 focus:outline-none dark:bg-gray-600 dark:border-gray-600 dark:text-white dark:betterhover:hover:bg-gray-500 dark:betterhover:hover:border-gray-500 transition-transform duration-150 {isButtonAnimating ? 'scale-95' : ''}"
       on:mousedown={handleMousedown}
       on:click={handleButtonclick}
       disabled={!inputValue.trim()}
