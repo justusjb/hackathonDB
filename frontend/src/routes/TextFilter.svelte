@@ -37,7 +37,6 @@
   "
 >
   <div class="value-container">
-    <div class="input-container">
       <input
         type="text"
         {placeholder}
@@ -49,7 +48,6 @@
         on:blur={handleBlur}
       />
     </div>
-  </div>
 </div>
 
 <style>
@@ -87,33 +85,28 @@
     border-color: var(--border-focus-color);
   }
 
-  .value-container {
-    align-items: center;
-    display: flex;
-    flex: 1 1 0%;
-    flex-wrap: wrap;
-    padding: 0px 16px;
-    position: relative;
-    overflow: hidden;
-    box-sizing: border-box;
-  }
+.value-container {
+  align-items: center;
+  display: flex;
+  flex: 1 1 0%;
+  padding: 0px 16px;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+  cursor: text;
+}
 
-  .input-container {
-    flex: 1 1 0%;
-    display: flex;
-  }
-
-  .svelte-select-input {
-    flex-grow: 1;
-    background-color: transparent;
-    border: none;
-    font-size: 16px;
-    line-height: 24px;
-    padding: 5px 0;
-    min-width: 10px;
-    cursor: default;
-    height: 33.9915px;
-  }
+.svelte-select-input {
+  flex-grow: 1;
+  background-color: transparent;
+  border: none;
+  font-size: 16px;
+  line-height: 24px;
+  padding: 5px 0;
+  min-width: 100%;
+  height: 100%;
+  cursor: text;
+}
 
   .svelte-select-input::placeholder {
     color: var(--placeholder-color);
