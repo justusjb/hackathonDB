@@ -129,7 +129,7 @@
 <div class="p-4 bg-white dark:bg-gray-900">
 
 <TextFilter
-  placeholder="Search hackathons..."
+  placeholder="Search hackathons"
   isDarkMode={$darkMode}
   on:input={handleInput}
 />

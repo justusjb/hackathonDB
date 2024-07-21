@@ -102,10 +102,11 @@
   border: none;
   font-size: 16px;
   line-height: 24px;
-  padding: 5px 0;
-  min-width: 100%;
+  padding: 5px 16px;
+  min-width: calc(100% + 32px);
   height: 100%;
   cursor: text;
+  margin-left: -16px;
 }
 
   .svelte-select-input::placeholder {
