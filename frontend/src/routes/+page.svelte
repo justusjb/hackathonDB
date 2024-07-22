@@ -1,6 +1,7 @@
 <script lang="ts">
-    import { HackathonCard, InputWithSubmit } from '../lib';
+    import { Alert, HackathonCard, InputWithSubmit } from '../lib';
     import { writable, derived } from 'svelte/store';
+    import { fly } from 'svelte/transition';
     import LocationFilter from './LocationFilter.svelte';
     import StatusFilter from './StatusFilter.svelte';
     import TextFilter from "./TextFilter.svelte";
@@ -66,9 +67,9 @@
     }
 
 
-      let showAlert = false;
-      let alertType = '';
-      let alertMessage = '';
+  let showAlert = false;
+  let alertType: 'success' | 'error' = 'success';
+  let alertMessage = '';
 
 
     async function handleEmailSubmit(value: string) {
@@ -138,22 +139,8 @@
 
 {:else}
 
-    {#if showAlert}
-  <div role="alert" class="alert alert-{alertType}">
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      class="h-6 w-6 shrink-0 stroke-current"
-      fill="none"
-      viewBox="0 0 24 24">
-      <path
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width="2"
-        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-    <span>{alertMessage}</span>
-  </div>
-{/if}
+<Alert bind:show={showAlert} type={alertType} message={alertMessage} />
+
 
 <!-- Landing page Section -->
 <div class="flex flex-col items-center justify-center bg-gradient-to-r from-blue-100 via-blue-200 to-blue-300 dark:from-gray-700 dark:via-gray-800 dark:to-gray-900 text-center pb-6 pt-12 sm:pb-10 sm:pt-16 md:pb-12 md:pt-24 lg:pb-20 lg:pt-36">
