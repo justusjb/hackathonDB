@@ -2,20 +2,25 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.templating import Jinja2Templates
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 from pymongo import MongoClient
 import os
 import json
 from bson import ObjectId
 from datetime import datetime
 from opencage.geocoder import OpenCageGeocode
-from pprint import pprint
 from pydantic import BaseModel, EmailStr
 
 
 # print current working directory
 print(os.getcwd())
-
 app = FastAPI()
+
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 templates = Jinja2Templates(directory="templates")
 
@@ -66,8 +71,10 @@ async def read_hackathons():
 
 
 @app.post("/api/submit-email")
-async def submit_email(submission: EmailSubmission):
+@limiter.limit("3/minute")
+async def submit_email(submission: EmailSubmission, request: Request):
     client = MongoClient(os.getenv('MONGODB_URI'))
+    #db = client.hackathons_test_1
     db = client.hackathons_prod
 
     result = db.emails.insert_one({
@@ -80,7 +87,8 @@ async def submit_email(submission: EmailSubmission):
 
 
 @app.post("/api/submit-hackathon")
-async def submit_hackathon(submission: HackathonSubmission):
+@limiter.limit("5/minute")
+async def submit_hackathon(submission: HackathonSubmission, request: Request):
     client = MongoClient(os.getenv('MONGODB_URI'))
     db = client.hackathons_prod
 

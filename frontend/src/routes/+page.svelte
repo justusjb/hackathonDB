@@ -74,8 +74,6 @@
 
     async function handleEmailSubmit(value: string) {
 
-    console.log("Email submitted:", value);
-
     const sanitizedValue = sanitizeInput(value);
     const response = await fetch(`${import.meta.env.VITE_API_URL}/submit-email`, {
       method: 'POST',
@@ -86,8 +84,6 @@
   }
 
   async function handleHackathonSubmit(value: string) {
-
-    console.log("Hackathon submitted:", value);
 
     const sanitizedValue = sanitizeInput(value);
     const response = await fetch(`${import.meta.env.VITE_API_URL}/submit-hackathon`, {
