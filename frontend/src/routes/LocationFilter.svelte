@@ -38,10 +38,13 @@ $: countries = [...new Set(hackathons.map(h => h.location.country))]
 
 function computeCheckedStates() {
     availableCities = [...new Set(hackathons
-        .filter(h => !checkedCountries.length || checkedCountries.includes(h.location.country))
-        .map(h => h.location.city))]
-        .sort()
-        .map(city => ({ value: city, label: city }));
+    .filter(h => !checkedCountries.length || checkedCountries.includes(h.location.country))
+    .map(h => `${h.location.city}, ${h.location.country}`))]
+    .sort()
+    .map(cityCountry => {
+        const [city, country] = cityCountry.split(', ');
+        return { value: city, label: cityCountry };
+    });
     checkedCities = checkedCities.filter(city => availableCities.some(ac => ac.value === city));
     updateFilters();
 }
