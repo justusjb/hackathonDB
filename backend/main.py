@@ -48,6 +48,7 @@ class EmailSubmission(BaseModel):
 
 class HackathonSubmission(BaseModel):
     hackathon: str
+    handled: bool = False
 
 
 @app.get("/api/hackathons")
@@ -85,6 +86,7 @@ async def submit_hackathon(submission: HackathonSubmission):
 
     result = db.hackathon_suggestions.insert_one({
         "hackathon": submission.hackathon,
+        "handled": submission.handled,
         "timestamp": datetime.now()
     })
     if result.inserted_id:
