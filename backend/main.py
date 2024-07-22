@@ -68,7 +68,7 @@ async def read_hackathons():
 @app.post("/api/submit-email")
 async def submit_email(submission: EmailSubmission):
     client = MongoClient(os.getenv('MONGODB_URI'))
-    db = client.hackathons_test_1
+    db = client.hackathons_prod
 
     result = db.emails.insert_one({
         "email": submission.email,
@@ -82,7 +82,7 @@ async def submit_email(submission: EmailSubmission):
 @app.post("/api/submit-hackathon")
 async def submit_hackathon(submission: HackathonSubmission):
     client = MongoClient(os.getenv('MONGODB_URI'))
-    db = client.hackathons_test_1
+    db = client.hackathons_prod
 
     result = db.hackathon_suggestions.insert_one({
         "hackathon": submission.hackathon,
