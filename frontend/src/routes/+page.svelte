@@ -5,6 +5,8 @@
     import StatusFilter from './StatusFilter.svelte';
     import TextFilter from "./TextFilter.svelte";
     import { darkMode } from '../stores/darkMode.js';
+    import { sanitizeInput } from './utils'; // We'll create this utility function
+
 
 
     type Hackathon = {
@@ -63,15 +65,51 @@
         selectedStatuses.set(event.detail.statuses);
     }
 
-    function handleEmailSubmit(value: string) {
-    // Handle email submit logic here
+
+      let showAlert = false;
+      let alertType = '';
+      let alertMessage = '';
+
+
+    async function handleEmailSubmit(value: string) {
+
     console.log("Email submitted:", value);
+
+    const sanitizedValue = sanitizeInput(value);
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/submit-email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: sanitizedValue })
+    });
+    await handleResponse(response, 'Email');
   }
 
-  function handleHackathonSubmit(value: string) {
-    // Handle hackathon submit logic here
+  async function handleHackathonSubmit(value: string) {
+
     console.log("Hackathon submitted:", value);
+
+    const sanitizedValue = sanitizeInput(value);
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/submit-hackathon`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ hackathon: sanitizedValue })
+    });
+    await handleResponse(response, 'Hackathon');
   }
+
+  async function handleResponse(response: Response, type: string) {
+    if (response.ok) {
+      showAlert = true;
+      alertType = 'success';
+      alertMessage = `${type} submitted successfully!`;
+    } else {
+      showAlert = true;
+      alertType = 'error';
+      alertMessage = `Failed to submit ${type}. Please try again.`;
+    }
+    setTimeout(() => showAlert = false, 5000); // Hide alert after 5 seconds
+  }
+
 
 </script>
 
@@ -100,9 +138,26 @@
 
 {:else}
 
+    {#if showAlert}
+  <div role="alert" class="alert alert-{alertType}">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      class="h-6 w-6 shrink-0 stroke-current"
+      fill="none"
+      viewBox="0 0 24 24">
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+    <span>{alertMessage}</span>
+  </div>
+{/if}
+
 <!-- Landing page Section -->
 <div class="flex flex-col items-center justify-center bg-gradient-to-r from-blue-100 via-blue-200 to-blue-300 dark:from-gray-700 dark:via-gray-800 dark:to-gray-900 text-center pb-6 pt-12 sm:pb-10 sm:pt-16 md:pb-12 md:pt-24 lg:pb-20 lg:pt-36">
-  <h2 class="text-4xl sm:text-5xl md:text-6xl lg:text-6xl font-extrabold text-blue-900 dark:text-white mb-4 sm:mb-6 md:mb-8 px-4">
+  <h2 class="text-5xl sm:text-5xl md:text-6xl lg:text-6xl font-extrabold text-blue-900 dark:text-white mb-6 sm:mb-8 md:mb-10 px-4">
     The best place to find hackathons
   </h2>
 
@@ -110,7 +165,7 @@
     <InputWithSubmit
       placeholder="Enter your email"
       buttonText="Submit"
-      description="Get updates on the future of HackathonDB 🚀 no spam, pinky promise 🥺"
+      description="Join the HackathonDB community 🚀"
       onSubmit={handleEmailSubmit}
     />
 

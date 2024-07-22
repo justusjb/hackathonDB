@@ -9,6 +9,7 @@ from bson import ObjectId
 from datetime import datetime
 from opencage.geocoder import OpenCageGeocode
 from pprint import pprint
+from pydantic import BaseModel, EmailStr
 
 
 # print current working directory
@@ -41,6 +42,14 @@ class JSONEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
+class EmailSubmission(BaseModel):
+    email: EmailStr
+
+
+class HackathonSubmission(BaseModel):
+    hackathon: str
+
+
 @app.get("/api/hackathons")
 async def read_hackathons():
     client = MongoClient(os.getenv('MONGODB_URI'))
@@ -53,6 +62,34 @@ async def read_hackathons():
     hackathons_json = json.dumps(hackathons, cls=JSONEncoder)
     print(hackathons_json)
     return JSONResponse(content=json.loads(JSONEncoder().encode(hackathons)))
+
+
+@app.post("/api/submit-email")
+async def submit_email(submission: EmailSubmission):
+    client = MongoClient(os.getenv('MONGODB_URI'))
+    db = client.hackathons_test_1
+
+    result = db.emails.insert_one({
+        "email": submission.email,
+        "timestamp": datetime.now()
+    })
+    if result.inserted_id:
+        return {"message": "Email submitted successfully"}
+    raise HTTPException(status_code=500, detail="Failed to submit email")
+
+
+@app.post("/api/submit-hackathon")
+async def submit_hackathon(submission: HackathonSubmission):
+    client = MongoClient(os.getenv('MONGODB_URI'))
+    db = client.hackathons_test_1
+
+    result = db.hackathon_suggestions.insert_one({
+        "hackathon": submission.hackathon,
+        "timestamp": datetime.now()
+    })
+    if result.inserted_id:
+        return {"message": "Hackathon submitted successfully"}
+    raise HTTPException(status_code=500, detail="Failed to submit hackathon")
 
 
 @app.get("/health")
@@ -88,7 +125,6 @@ if LOCAL_DEV:
             all_city_data = geodata_api_call(f"{query_prefix} {city}")
             if all_city_data is None:
                 raise Exception("City not found")
-
 
         if ('geometry' not in all_city_data or 'lat' not in all_city_data['geometry'] or 'lng' not in
                 all_city_data['geometry']):
