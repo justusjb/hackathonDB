@@ -1,8 +1,14 @@
 <script lang="ts">
-    import { HackathonCard, InputWithSubmit } from '../lib';
+    import { Alert, HackathonCard, InputWithSubmit } from '../lib';
     import { writable, derived } from 'svelte/store';
+    import { fly } from 'svelte/transition';
     import LocationFilter from './LocationFilter.svelte';
     import StatusFilter from './StatusFilter.svelte';
+    import TextFilter from "./TextFilter.svelte";
+    import { darkMode } from '../stores/darkMode.js';
+    import { sanitizeInput } from './utils'; // We'll create this utility function
+
+
 
     type Hackathon = {
         name: string;
@@ -12,7 +18,13 @@
         status: string;
     };
 
-    export let data: { hackathons: Hackathon[] };
+
+    //export let data: { hackathons: Hackathon[] };
+    //export let error: string | null;
+
+    export let data: { hackathons: Hackathon[]; error: string | null };
+
+    const { hackathons, error } = data;
 
     const filterText = writable('');
     const selectedStatuses = writable<Set<string>>(new Set());
@@ -54,40 +66,59 @@
         selectedStatuses.set(event.detail.statuses);
     }
 
-    function handleEmailSubmit() {
-    // Handle email submit logic here
-    console.log("Email submitted");
+
+  let showAlert = false;
+  let alertType: 'success' | 'error' = 'success';
+  let alertMessage = '';
+
+
+    async function handleEmailSubmit(value: string) {
+
+    console.log("Email submitted:", value);
+
+    const sanitizedValue = sanitizeInput(value);
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/submit-email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: sanitizedValue })
+    });
+    await handleResponse(response, 'Email');
   }
 
-  function handleHackathonSubmit() {
-    // Handle hackathon submit logic here
-    console.log("Hackathon submitted");
+  async function handleHackathonSubmit(value: string) {
+
+    console.log("Hackathon submitted:", value);
+
+    const sanitizedValue = sanitizeInput(value);
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/submit-hackathon`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ hackathon: sanitizedValue })
+    });
+    await handleResponse(response, 'Hackathon');
   }
+
+  async function handleResponse(response: Response, type: string) {
+    if (response.ok) {
+      showAlert = true;
+      alertType = 'success';
+      alertMessage = `${type} submitted successfully!`;
+    } else {
+      showAlert = true;
+      alertType = 'error';
+      alertMessage = `Failed to submit ${type}. Please try again.`;
+    }
+    setTimeout(() => showAlert = false, 5000); // Hide alert after 5 seconds
+  }
+
 
 </script>
 
-
 <style>
-    .custom-button {
-        background-color: #1E3A8A; /* Darker blue color */
-        border: 2px solid #1E3A8A; /* Matching border color */
-        color: white;
-        border-radius: 0 0.5rem 0.5rem 0; /* Adjusted border-radius to match input */
-        padding: 0.5rem 1rem;
-        transition: background-color 0.3s, border-color 0.3s; /* Smooth transition */
-    }
-
-    .custom-button:hover {
-        background-color: #1D4ED8; /* Slightly lighter blue on hover */
-        border-color: #1D4ED8; /* Matching border color on hover */
-    }
-
-    .custom-button:focus {
-        outline: none;
-        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5); /* Focus ring */
-    }
+  :global(.custom-select.svelte-select-wrapper:hover) {
+    border: var(--border-hover) !important;
+  }
 </style>
-
 
 
 <svelte:head>
@@ -95,52 +126,54 @@
     <meta name="description" content="Find upcoming hackathons!" />
 </svelte:head>
 
+{#if error}
+    <div class="h-full bg-gray-100 dark:bg-gray-900">
 
-
-<!-- Header Bar -->
-    <div class="header-bar bg-white py-4 shadow-md">
-        <div class="container mx-auto px-4">
-            <h1 class="text-2xl font-bold text-blue-900">HackathonDB</h1>
-        </div>
+<div class="flex-grow p-4">
+    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+        <strong class="font-bold">Error:</strong>
+        <span class="block sm:inline">{error}</span>
     </div>
+</div>
+        </div>
+
+{:else}
+
+<Alert bind:show={showAlert} type={alertType} message={alertMessage} />
 
 
+<!-- Landing page Section -->
+<div class="flex flex-col items-center justify-center bg-gradient-to-r from-blue-100 via-blue-200 to-blue-300 dark:from-gray-700 dark:via-gray-800 dark:to-gray-900 text-center pb-6 pt-12 sm:pb-10 sm:pt-16 md:pb-12 md:pt-24 lg:pb-20 lg:pt-36">
+  <h2 class="text-5xl sm:text-5xl md:text-6xl lg:text-6xl font-extrabold text-blue-900 dark:text-white mb-6 sm:mb-8 md:mb-10 px-4">
+    The best place to find hackathons
+  </h2>
 
-
-    <!-- Hero Section -->
-    <div class="flex flex-col items-center justify-center h-auto bg-gradient-to-r from-blue-100 via-blue-200 to-blue-300 text-center">
-        <h2 class="text-6xl font-extrabold text-blue-900 mb-8 pt-32 px-4">
-            The best place to find hackathons
-        </h2>
-
-<div class="w-full max-w-md pb-28 px-4 pt-6">
-
+  <div class="w-full max-w-md px-4 py-4 sm:py-6 md:py-8">
     <InputWithSubmit
       placeholder="Enter your email"
       buttonText="Submit"
-      description="Get updates on the future of HackathonDB 🚀 no spam, pinky promise 🥺"
+      description="Join the HackathonDB community 🚀"
       onSubmit={handleEmailSubmit}
     />
 
-    <InputWithSubmit
-      placeholder="Input a new hackathon..."
-      buttonText="Submit"
-      description="Know a hackathon that’s missing? Please share it! 🤩"
-      onSubmit={handleHackathonSubmit}
-    />
-
-</div>
+    <div class="mt-4 sm:mt-6 md:mt-8">
+      <InputWithSubmit
+        placeholder="Input a new hackathon..."
+        buttonText="Submit"
+        description="Know a hackathon that's missing? Please share it! 🤩"
+        onSubmit={handleHackathonSubmit}
+      />
     </div>
+  </div>
+</div>
 
+<!-- Hackathon finding Section -->
+<div class="p-4 bg-white dark:bg-gray-900">
 
-<div class="p-4 min-h-screen">
-
-    <input
-        type="text"
-        placeholder="Search hackathons..."
-        class="border p-2 mb-4 w-full"
-        on:input={handleInput}
-    />
+<TextFilter
+  placeholder="Search hackathons"
+  on:input={handleInput}
+/>
 
     <StatusFilter on:statusUpdate={handleStatusFilterUpdate} />
 
@@ -150,10 +183,15 @@
         on:filterUpdate={handleLocationFilterUpdate}
     />
 
+    <div class="min-h-screen">
 <div class="grid grid-cols-1 gap-4 justify-items-center">
     {#if data.hackathons.length === 0}
         <div class="flex justify-center items-center h-full">
             <p>No hackathons available.</p>
+        </div>
+    {:else if $filteredHackathons.length === 0}
+        <div class="flex justify-center items-center h-full">
+            <p>No hackathons match the selected filters.</p>
         </div>
     {/if}
     {#each $filteredHackathons as hackathon}
@@ -161,7 +199,8 @@
             <HackathonCard {hackathon} />
         </div>
     {/each}
-
+</div>
+</div>
 </div>
 
-</div>
+{/if}

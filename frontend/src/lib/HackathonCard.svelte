@@ -6,6 +6,7 @@
         URL: string;
         status: string;
     };
+
     function formatDate(dateString: string) {
         const date = new Date(dateString);
         return date.toLocaleDateString();
@@ -27,16 +28,16 @@
     }
 </script>
 
-<div class="bg-white shadow-md rounded-lg overflow-hidden m-4">
+<div class="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden m-4">
     <div class="p-4">
-        <h2 class="text-2xl font-bold mb-2">{hackathon.name}</h2>
-        <p class="text-gray-600">{hackathon.location.city}, {hackathon.location.country}</p>
-        <p class="text-gray-600">Start Date: {formatDate(hackathon.date.start_date)}</p>
-        <p class="text-gray-600">End Date: {formatDate(hackathon.date.end_date)}</p>
-        <a href={hackathon.URL} class="text-blue-500 hover:underline mt-2 block"  target="_blank" rel="noopener noreferrer">Website</a>
+        <h2 class="text-2xl font-bold mb-2 text-gray-800 dark:text-gray-300">{hackathon.name}</h2>
+        <p class="text-gray-600 dark:text-gray-300">{hackathon.location.city}, {hackathon.location.country}</p>
+        <p class="text-gray-600 dark:text-gray-300">Start Date: {formatDate(hackathon.date.start_date)}</p>
+        <p class="text-gray-600 dark:text-gray-300">End Date: {formatDate(hackathon.date.end_date)}</p>
+        <a href={hackathon.URL} class="text-blue-500 hover:underline mt-2 inline-block dark:text-blue-400" target="_blank" rel="noopener noreferrer">Website</a>
         <div class="flex items-center mt-2">
             <div class={`w-3 h-3 rounded-full ${getStatusClass(hackathon.status)} mr-2`}></div>
-            <p class="text-gray-600">Status: {hackathon.status.replace('_', ' ')}</p>
+            <p class="text-gray-600 dark:text-gray-300">Status: {hackathon.status.replace('_', ' ')}</p>
         </div>
     </div>
 </div>

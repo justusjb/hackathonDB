@@ -1,6 +1,7 @@
 <script lang="ts">
     import { createEventDispatcher } from 'svelte';
     import { writable, get } from 'svelte/store';
+    import { darkMode } from '../stores/darkMode.js';
 
     const selectedStatuses = writable<Set<string>>(new Set());
 
@@ -8,6 +9,8 @@
     const applicationsOpenChecked = writable(false);
     const applicationsClosedChecked = writable(false);
     const expectedChecked = writable(false);
+
+    $: isDarkMode = $darkMode;
 
     // Dispatch events to notify the parent component of changes
     const dispatch = createEventDispatcher();
@@ -35,27 +38,38 @@
     });
 </script>
 
-<div class="mb-4">
-    <label class="inline-flex items-center mr-4">
-        <input type="checkbox" class="form-checkbox text-yellow-500 h-5 w-5" bind:checked={$announcedChecked} on:change={() => toggleStatus('announced')}>
-        <span class="ml-2 text-gray-700">Announced</span>
-    </label>
-    <label class="inline-flex items-center mr-4">
-        <input type="checkbox" class="form-checkbox text-green-600 h-5 w-5" bind:checked={$applicationsOpenChecked} on:change={() => toggleStatus('applications_open')}>
-        <span class="ml-2 text-gray-700">Applications Open</span>
-    </label>
-    <label class="inline-flex items-center mr-4">
-        <input type="checkbox" class="form-checkbox text-red-600 h-5 w-5" bind:checked={$applicationsClosedChecked} on:change={() => toggleStatus('applications_closed')}>
-        <span class="ml-2 text-gray-700">Applications Closed</span>
-    </label>
-    <label class="inline-flex items-center mr-4">
-        <input type="checkbox" class="form-checkbox text-gray-400 h-5 w-5" bind:checked={$expectedChecked} on:change={() => toggleStatus('expected')}>
-        <span class="ml-2 text-gray-700">Expected</span>
-    </label>
+    <h3 class="font-bold {isDarkMode ? 'text-gray-300' : 'text-black'}">Cities</h3>
+<div class="flex flex-wrap gap-4 my-2">
+    <div class="form-control">
+        <label class="label cursor-pointer">
+            <input type="checkbox" class="checkbox checkbox-warning mr-2"
+                   bind:checked={$announcedChecked}
+                   on:change={() => toggleStatus('announced')}/>
+            <span class="label-text text-gray-800 dark:text-gray-300">Announced</span>
+        </label>
+    </div>
+    <div class="form-control">
+        <label class="label cursor-pointer">
+            <input type="checkbox" class="checkbox checkbox-success mr-2"
+                   bind:checked={$applicationsOpenChecked}
+                   on:change={() => toggleStatus('applications_open')}/>
+            <span class="label-text text-gray-800 dark:text-gray-300">Applications Open</span>
+        </label>
+    </div>
+    <div class="form-control">
+        <label class="label cursor-pointer">
+            <input type="checkbox" class="checkbox checkbox-error mr-2"
+                   bind:checked={$applicationsClosedChecked}
+                   on:change={() => toggleStatus('applications_closed')}/>
+            <span class="label-text text-gray-800 dark:text-gray-300">Applications Closed</span>
+        </label>
+    </div>
+    <div class="form-control">
+        <label class="label cursor-pointer">
+            <input type="checkbox" class="checkbox checkbox-neutral border-gray-600 dark:border-gray-600 mr-2"
+                   bind:checked={$expectedChecked}
+                   on:change={() => toggleStatus('expected')}/>
+            <span class="label-text text-gray-800 dark:text-gray-300">Expected</span>
+        </label>
+    </div>
 </div>
-
-<style>
-    .form-checkbox {
-        margin-right: 8px;
-    }
-</style>
