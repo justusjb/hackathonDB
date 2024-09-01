@@ -38,7 +38,7 @@
     });
 </script>
 
-    <h3 class="font-bold {isDarkMode ? 'text-gray-300' : 'text-black'}">Cities</h3>
+    <h3 class="font-bold {isDarkMode ? 'text-gray-300' : 'text-black'}">Application Status</h3>
 <div class="flex flex-wrap gap-4 my-2">
     <div class="form-control">
         <label class="label cursor-pointer">
