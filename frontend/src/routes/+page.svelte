@@ -18,20 +18,27 @@
         status: string;
     };
 
-
     //export let data: { hackathons: Hackathon[] };
     //export let error: string | null;
 
     export let data: { hackathons: Hackathon[]; error: string | null };
 
-    const { hackathons, error } = data;
+    const { hackathons: allHackathons, error } = data;
+
+    function filterCurrentAndFutureHackathons(hackathons: Hackathon[]): Hackathon[] {
+    const currentDate = new Date().toISOString().split('T')[0];
+    return hackathons.filter(hackathon => hackathon.date.start_date >= currentDate);
+}
+
+    const hackathons = filterCurrentAndFutureHackathons(allHackathons);
+
 
     const filterText = writable('');
     const selectedStatuses = writable<Set<string>>(new Set());
     const selectedLocations = writable<{ countries: string[], cities: string[] }>({ countries: [], cities: [] });
 
     const filteredHackathons = derived(
-        [filterText, writable(data.hackathons), selectedStatuses, selectedLocations],
+        [filterText, writable(hackathons), selectedStatuses, selectedLocations],
         ([$filterText, $hackathons, $selectedStatuses, $selectedLocations]) => {
             return $hackathons.filter(hackathon => {
                 const textMatch = !$filterText ||
@@ -175,13 +182,13 @@
 
 
     <LocationFilter
-        hackathons={data.hackathons}
+        hackathons={hackathons}
         on:filterUpdate={handleLocationFilterUpdate}
     />
 
     <div class="min-h-screen">
 <div class="grid grid-cols-1 gap-4 justify-items-center">
-    {#if data.hackathons.length === 0}
+    {#if hackathons.length === 0}
         <div class="flex justify-center items-center h-full">
             <p>No hackathons available.</p>
         </div>
