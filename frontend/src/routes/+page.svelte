@@ -22,6 +22,11 @@
     //export let data: { hackathons: Hackathon[] };
     //export let error: string | null;
 
+    function getCurrentDate() {
+    const now = new Date();
+    return now.toISOString().split('T')[0]; // Returns date in 'YYYY-MM-DD' format
+    }
+
     export let data: { hackathons: Hackathon[]; error: string | null };
 
     const { hackathons, error } = data;
@@ -33,6 +38,7 @@
     const filteredHackathons = derived(
         [filterText, writable(data.hackathons), selectedStatuses, selectedLocations],
         ([$filterText, $hackathons, $selectedStatuses, $selectedLocations]) => {
+            const currentDate = getCurrentDate();
             return $hackathons.filter(hackathon => {
                 const textMatch = !$filterText ||
                     hackathon.name.toLowerCase().includes($filterText.toLowerCase()) ||
@@ -47,7 +53,9 @@
                 const cityMatch = $selectedLocations.cities.length === 0 ||
                     $selectedLocations.cities.includes(hackathon.location.city);
 
-                return textMatch && statusMatch && countryMatch && cityMatch;
+                const dateMatch = hackathon.date.start_date >= currentDate;
+
+                return textMatch && statusMatch && countryMatch && cityMatch && dateMatch;
             }).sort((a, b) => new Date(a.date.start_date).getTime() - new Date(b.date.start_date).getTime());
         }
     );
