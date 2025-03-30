@@ -1,22 +1,19 @@
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Depends
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from pymongo import MongoClient
-import os
 from datetime import datetime
 from opencage.geocoder import OpenCageGeocode
-from dotenv import load_dotenv
 import uvicorn
 from settings import settings
 
-env_path = '.env'
-if os.path.exists(env_path):
-    load_dotenv(dotenv_path=env_path)
-    print("Loaded environment from .env file")
-else:
-    print("No .env file found, using system environment variables")
 
 app = FastAPI()
+
+mongo_client = MongoClient(settings.MONGODB_URI)
+
+def get_db():
+    return mongo_client[settings.mongodb_database]
 
 geocoder = OpenCageGeocode(settings.OPENCAGE_API_KEY)
 
@@ -64,9 +61,7 @@ def get_city_data(city):
 
 
 @app.post("/submit")
-async def submit_form(request: Request):
-    client = MongoClient(settings.MONGODB_URI)
-    db = client[settings.mongodb_database]
+async def submit_form(request: Request, db = Depends(get_db)):
     collection = db.hackathons
     try:
         data = await request.json()

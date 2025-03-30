@@ -3,5 +3,4 @@ fastapi
 uvicorn
 opencage
 jinja2
-python-dotenv
 pydantic-settings
