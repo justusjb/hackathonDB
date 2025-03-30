@@ -5,3 +5,4 @@ opencage
 slowapi
 jinja2
 pydantic[email]
+python-dotenv
