@@ -1,8 +1,7 @@
 pymongo
 fastapi
 uvicorn
-opencage
 slowapi
-jinja2
 pydantic[email]
+pydantic-settings
 python-dotenv
