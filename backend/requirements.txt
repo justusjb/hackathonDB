@@ -1,6 +1,7 @@
 pymongo
 fastapi
-fastapi-featureflags
 uvicorn
 opencage
 slowapi
+jinja2
+pydantic[email]
