@@ -12,7 +12,15 @@ from bson import ObjectId
 from datetime import datetime
 from opencage.geocoder import OpenCageGeocode
 from pydantic import BaseModel, EmailStr
+from dotenv import load_dotenv
 
+
+env_path = '.env'
+if os.path.exists(env_path):
+    load_dotenv(dotenv_path=env_path)
+    print("Loaded environment from .env file")
+else:
+    print("No .env file found, using system environment variables")
 
 # print current working directory
 print(os.getcwd())
