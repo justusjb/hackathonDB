@@ -4,4 +4,3 @@ uvicorn
 slowapi
 pydantic[email]
 pydantic-settings
-python-dotenv

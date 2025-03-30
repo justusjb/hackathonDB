@@ -1,22 +1,20 @@
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Depends
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from pymongo import MongoClient
-import os
 from datetime import datetime
 from opencage.geocoder import OpenCageGeocode
-from dotenv import load_dotenv
 import uvicorn
 from settings import settings
-
-env_path = '.env'
-if os.path.exists(env_path):
-    load_dotenv(dotenv_path=env_path)
-    print("Loaded environment from .env file")
-else:
-    print("No .env file found, using system environment variables")
+import httpx
+import os
 
 app = FastAPI()
+
+mongo_client = MongoClient(settings.MONGODB_URI)
+
+def get_db():
+    return mongo_client[settings.mongodb_database]
 
 geocoder = OpenCageGeocode(settings.OPENCAGE_API_KEY)
 
@@ -64,9 +62,7 @@ def get_city_data(city):
 
 
 @app.post("/submit")
-async def submit_form(request: Request):
-    client = MongoClient(settings.MONGODB_URI)
-    db = client[settings.mongodb_database]
+async def submit_form(request: Request, db = Depends(get_db)):
     collection = db.hackathons
     try:
         data = await request.json()
@@ -113,6 +109,23 @@ async def submit_form(request: Request):
                             f"<br>ID of the inserted document: {db_id.inserted_id}"}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.get("/api/test-scraping")
+async def test_scraping_access():
+    """Test that we can access the secured scraping endpoint"""
+    backend_url = os.getenv("BACKEND_URL", "http://localhost:8000")
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                f"{backend_url}/scraping/start",
+                headers={"X-API-Key": settings.ADMIN_API_KEY},
+                timeout=10.0
+            )
+            response.raise_for_status()
+            return response.json()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error connecting to backend: {str(e)}")
 
 
 if __name__ == "__main__":

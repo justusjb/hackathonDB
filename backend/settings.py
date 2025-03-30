@@ -5,6 +5,7 @@ class Settings(BaseSettings):
     # Environment configuration
     ENVIRONMENT: Literal["production", "staging"] 
     MONGODB_URI: str
+    ADMIN_API_KEY: str
     
     # Computed properties
     @property
