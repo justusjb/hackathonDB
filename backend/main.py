@@ -12,6 +12,7 @@ from datetime import datetime
 from pydantic import BaseModel, EmailStr
 from dotenv import load_dotenv
 import uvicorn
+from settings import settings
 
 
 env_path = '.env'
@@ -20,16 +21,6 @@ if os.path.exists(env_path):
     print("Loaded environment from .env file")
 else:
     print("No .env file found, using system environment variables")
-
-
-PROD = os.getenv("PROD")
-if PROD is None:
-    raise ValueError("PROD environment variable is not set. Please set it to either 'True' or 'False'")
-PROD = PROD.lower()
-if PROD not in ["true", "false"]:
-    raise ValueError(f"PROD environment variable is set to '{PROD}', but must be either 'True' or 'False'")
-PROD = PROD == "true"
-
 
 app = FastAPI()
 
@@ -67,8 +58,8 @@ class HackathonSubmission(BaseModel):
 
 @app.get("/api/hackathons")
 async def read_hackathons():
-    client = MongoClient(os.getenv('MONGODB_URI'))
-    db = client.hackathons_prod if PROD else client.hackathons_test_1
+    client = MongoClient(settings.MONGODB_URI)
+    db = client[settings.mongodb_database]
     collection = db.hackathons
     hackathons = list(collection.find({}))
     print(hackathons)
@@ -81,8 +72,8 @@ async def read_hackathons():
 @app.post("/api/submit-email")
 @limiter.limit("3/minute")
 async def submit_email(submission: EmailSubmission, request: Request):
-    client = MongoClient(os.getenv('MONGODB_URI'))
-    db = client.hackathons_prod if PROD else client.hackathons_test_1
+    client = MongoClient(settings.MONGODB_URI)
+    db = client[settings.mongodb_database]
 
     result = db.emails.insert_one({
         "email": submission.email,
@@ -96,8 +87,8 @@ async def submit_email(submission: EmailSubmission, request: Request):
 @app.post("/api/submit-hackathon")
 @limiter.limit("5/minute")
 async def submit_hackathon(submission: HackathonSubmission, request: Request):
-    client = MongoClient(os.getenv('MONGODB_URI'))
-    db = client.hackathons_prod if PROD else client.hackathons_test_1
+    client = MongoClient(settings.MONGODB_URI)
+    db = client[settings.mongodb_database]
 
     result = db.hackathon_suggestions.insert_one({
         "hackathon": submission.hackathon,

@@ -7,7 +7,7 @@ from datetime import datetime
 from opencage.geocoder import OpenCageGeocode
 from dotenv import load_dotenv
 import uvicorn
-
+from settings import settings
 
 env_path = '.env'
 if os.path.exists(env_path):
@@ -18,17 +18,9 @@ else:
 
 app = FastAPI()
 
-geocoder = OpenCageGeocode(os.getenv('OPENCAGE_API_KEY'))
+geocoder = OpenCageGeocode(settings.OPENCAGE_API_KEY)
 
 templates = Jinja2Templates(directory="templates")
-
-PROD = os.getenv("PROD")
-if PROD is None:
-    raise ValueError("PROD environment variable is not set. Please set it to either 'True' or 'False'")
-PROD = PROD.lower()
-if PROD not in ["true", "false"]:
-    raise ValueError(f"PROD environment variable is set to '{PROD}', but must be either 'True' or 'False'")
-PROD = PROD == "true"
 
 @app.get("/", response_class=HTMLResponse)
 async def read_form(request: Request):
@@ -73,8 +65,8 @@ def get_city_data(city):
 
 @app.post("/submit")
 async def submit_form(request: Request):
-    client = MongoClient(os.getenv('MONGODB_URI'))
-    db = client.hackathons_prod if PROD else client.hackathons_test_1
+    client = MongoClient(settings.MONGODB_URI)
+    db = client[settings.mongodb_database]
     collection = db.hackathons
     try:
         data = await request.json()
