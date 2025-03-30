@@ -6,6 +6,7 @@ class Settings(BaseSettings):
     ENVIRONMENT: Literal["production", "staging"] 
     MONGODB_URI: str
     OPENCAGE_API_KEY: str
+    ADMIN_API_KEY: str
     
     # Computed properties
     @property

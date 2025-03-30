@@ -25,7 +25,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(public_router, prefix="/api")
-app.include_router(scraping_router, prefix="/api/admin")
+app.include_router(scraping_router, prefix="/scraping")
 
 @app.get("/health")
 async def health_check():

@@ -140,6 +140,36 @@
     </form>
     <div id="message"></div>
 </div>
+<div style="margin-top: 20px; padding: 20px; background-color: #f0f0f0; border-radius: 5px;">
+    <h3>Admin Controls</h3>
+    <button id="test-scraping-btn" class="btn btn-secondary">Test Scraping Access</button>
+    <div id="scraping-result" style="margin-top: 10px; padding: 10px; background-color: #fff; border-radius: 3px; display: none;"></div>
+</div>
+
+<script>
+    document.getElementById('test-scraping-btn').addEventListener('click', async function() {
+        try {
+            const response = await fetch('/api/test-scraping');
+            const resultDiv = document.getElementById('scraping-result');
+            
+            if (response.ok) {
+                const data = await response.json();
+                resultDiv.textContent = 'Successfully connected to scraping API: ' + JSON.stringify(data);
+                resultDiv.style.color = 'green';
+            } else {
+                resultDiv.textContent = 'Failed to connect to scraping API: ' + response.statusText;
+                resultDiv.style.color = 'red';
+            }
+            resultDiv.style.display = 'block';
+        } catch (error) {
+            console.error('Error:', error);
+            document.getElementById('scraping-result').textContent = 'Error: ' + error.message;
+            document.getElementById('scraping-result').style.color = 'red';
+            document.getElementById('scraping-result').style.display = 'block';
+        }
+    });
+    </script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     initializeFlatpickr();
