@@ -17,6 +17,6 @@ tell application "Terminal"
     -- Create a new tab for the frontend service
     tell application "System Events" to tell process "Terminal" to keystroke "t" using command down
     delay 0.5
-    do script "cd $CURRENT_PATH/frontend && npm run dev" in front window
+    do script "cd $CURRENT_PATH/frontend && bun run dev" in front window
 end tell
 EOF
