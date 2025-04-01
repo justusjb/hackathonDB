@@ -1,39 +1,18 @@
 # backend/public_routes.py
 from fastapi import APIRouter, Depends, Request, HTTPException
-from fastapi.responses import JSONResponse
 from datetime import datetime
-from pydantic import BaseModel, EmailStr
-import json
-from bson import ObjectId
 from database import get_db
 from limiter import limiter
+from models import Hackathon, EmailSubmission, HackathonSubmission
 
 # Create the router
 public_router = APIRouter()
 
-# Custom JSON Encoder for MongoDB ObjectId
-class JSONEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, ObjectId):
-            return str(obj)
-        elif isinstance(obj, datetime):
-            return obj.isoformat()
-        return json.JSONEncoder.default(self, obj)
-
-class EmailSubmission(BaseModel):
-    email: EmailStr
-
-class HackathonSubmission(BaseModel):
-    hackathon: str
-    handled: bool = False
-
-
 @public_router.get("/hackathons")
 async def read_hackathons(db = Depends(get_db)):
     collection = db.hackathons
-    hackathons = list(collection.find({}))
-    hackathons_json = json.dumps(hackathons, cls=JSONEncoder)
-    return JSONResponse(content=json.loads(JSONEncoder().encode(hackathons)))
+    hackathons = [Hackathon.from_mongo(doc) for doc in collection.find({})]
+    return hackathons
 
 @public_router.post("/submit-email")
 @limiter.limit("3/minute")
