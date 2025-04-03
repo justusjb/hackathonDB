@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, Request, HTTPException
 from datetime import datetime
 from database import get_db
 from limiter import limiter
-from models import Hackathon, EmailSubmission, HackathonSubmission
+from shared_models import Hackathon, EmailSubmission, HackathonSubmission
 
 # Create the router
 public_router = APIRouter()

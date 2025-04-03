@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "shared_models"
+version = "0.1.0"
+description = "Shared Pydantic models for HackathonDB services"
+authors = [
+    {name = "Justus Beck", email = "jujo03h@icloud.com"}
+]
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "pydantic>=2.0.0",
+    "pydantic[email]",  # For EmailStr validation
+    "pymongo>=4.0.0",   # For MongoDB interaction
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "black>=23.0.0",
+    "isort>=5.0.0",
+]

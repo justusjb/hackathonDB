@@ -1,32 +1,38 @@
 from pydantic import BaseModel, EmailStr, Field
 from enum import Enum
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any
 from datetime import datetime
+
+"""
+Database structure:
+
+Hackathon object
+(MongoDB ID)
+name
+date
+  start_date
+  end_date
+location
+  city
+  state
+  country
+  coordinates
+      lat
+      long
+URL
+Notes
+status
+created_at
+"""
 
 class EmailSubmission(BaseModel):
     email: EmailStr
+
 
 class HackathonSubmission(BaseModel):
     hackathon: str
     handled: bool = False
 
-# Hackathon object
-# (MongoDB ID)
-# name
-# date
-#   start_date
-#   end_date
-# location
-#   city
-#   state
-#   country
-#   coordinates
-#       lat
-#       long
-# URL
-# Notes
-# status
-# created_at
 
 class Coordinates(BaseModel):
     lat: float
