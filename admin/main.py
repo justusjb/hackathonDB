@@ -1,20 +1,16 @@
 from fastapi import FastAPI, HTTPException, Request, Depends
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from pymongo import MongoClient
 from datetime import datetime
 from opencage.geocoder import OpenCageGeocode
 import uvicorn
 from settings import settings
 import httpx
 import os
+from shared_models import Hackathon, EmailSubmission, HackathonSubmission
+from database import get_db
 
 app = FastAPI()
-
-mongo_client = MongoClient(settings.MONGODB_URI)
-
-def get_db():
-    return mongo_client[settings.mongodb_database]
 
 geocoder = OpenCageGeocode(settings.OPENCAGE_API_KEY)
 
