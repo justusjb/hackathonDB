@@ -99,3 +99,11 @@ class Hackathon(HackathonBase):
             # Convert MongoDB ObjectId to string
             data["_id"] = str(data["_id"])
         return cls.model_validate(data)
+
+    @classmethod
+    def safe_from_mongo(cls, data: Dict[str, Any]) -> Optional["Hackathon"]:
+        try:
+            return cls.from_mongo(data)
+        except Exception as e:
+            print(f"Error parsing hackathon: {e}")
+            return None
