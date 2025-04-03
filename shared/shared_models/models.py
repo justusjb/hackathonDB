@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field, field_serializer
+from pydantic import BaseModel, EmailStr, Field, field_serializer, SerializationInfo
 from enum import Enum
 from typing import Optional, Dict, Any
 from datetime import datetime
@@ -51,8 +51,8 @@ class DateRange(BaseModel):
     end_date: datetime
 
     @field_serializer('start_date', 'end_date')
-    def serialize_datetime(self, dt: datetime) -> str:
-        return dt.isoformat()
+    def serialize_datetime(self, dt: datetime, info: SerializationInfo) -> str | datetime:
+        return dt.isoformat() if info.mode == 'json' else dt  # only serializing when json is requested is a workaround to ensure that dates are date objects in the MongoDB and not strings.
 
 
 class HackathonStatus(str, Enum):
@@ -81,13 +81,13 @@ class Hackathon(HackathonBase):
     }
     
     @field_serializer('created_at')
-    def serialize_datetime(self, dt: datetime) -> str:
-        return dt.isoformat()
+    def serialize_datetime(self, dt: datetime, info: SerializationInfo) -> str | datetime:
+        return dt.isoformat() if info.mode == 'json' else dt  # only serializing when json is requested is a workaround to ensure that dates are date objects in the MongoDB and not strings.
 
     # Method to convert to MongoDB dictionary
     def to_mongo(self) -> Dict[str, Any]:
         # Convert to dict that MongoDB can store
-        data = self.model_dump(by_alias=True, exclude={"id"})
+        data = self.model_dump(by_alias=True, exclude={"id"}, mode='python')
         if self.id:
             data["_id"] = self.id
         return data

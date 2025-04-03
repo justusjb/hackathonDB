@@ -7,7 +7,7 @@ import uvicorn
 from settings import settings
 import httpx
 import os
-from shared_models import Hackathon, EmailSubmission, HackathonSubmission
+from shared_models import Hackathon, EmailSubmission, HackathonStatus, Location, Coordinates, DateRange
 from database import get_db
 
 app = FastAPI()
@@ -63,8 +63,6 @@ async def submit_form(request: Request, db = Depends(get_db)):
     try:
         data = await request.json()
 
-        name = data['name']
-
         # Handle date
         dates = data['date-range'].split(" to ")
         start_date = datetime.strptime(dates[0], "%Y-%m-%d")
@@ -73,36 +71,40 @@ async def submit_form(request: Request, db = Depends(get_db)):
         # Handle city
         input_city = data['city']
         city_data = get_city_data(input_city)
-        city = city_data['city']
-        state = city_data['state']
-        country = city_data['country']
-        lat = city_data['lat']
-        long = city_data['long']
 
-        hackathon = {
-            "name": name,
-            "date": {
-                "start_date": start_date,
-                "end_date": end_date
-            },
-            "location": {
-                "city": city,
-                "state": state,
-                "country": country,
-                "coordinates": {
-                    "lat": lat,
-                    "long": long
-                }
-            },
-            "URL": data['URL'],
-            "notes": data['notes'],
-            "status": data['status'],
-            "created_at": datetime.now(),
+        # Build location model
+        location = Location(
+            city=city_data['city'],
+            state=city_data['state'],
+            country=city_data['country'],
+            coordinates=Coordinates(
+                lat=city_data['lat'],
+                long=city_data['long']
+            )
+        )
 
-        }
-        db_id = collection.insert_one(hackathon)
-        return {"message": f"Hackathon added successfully!<br>City: {city}<br>State: {state}<br>Country: {country}"
+        # Build date range model
+        date_range = DateRange(
+            start_date=start_date,
+            end_date=end_date
+        )
+
+        # Create the Hackathon object
+        hackathon = Hackathon(
+            name=data['name'],
+            date=date_range,
+            location=location,
+            URL=data['URL'],  # Using the alias
+            notes=data.get('notes', ''),
+            status=HackathonStatus(data['status']),
+            created_at=datetime.now()
+        )
+
+        db_id = collection.insert_one(hackathon.to_mongo())
+        return {"message": f"Hackathon added successfully!<br>City: {location.city}<br>State: {location.state}<br>Country: {location.country}"
                             f"<br>ID of the inserted document: {db_id.inserted_id}"}
+    except ValueError as ve:
+        raise HTTPException(status_code=422, detail=f"Validation error: {str(ve)}")
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
