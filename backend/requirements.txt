@@ -2,5 +2,7 @@ pymongo
 fastapi
 uvicorn
 slowapi
+pydantic>=2.11.0
 pydantic[email]
 pydantic-settings
+-e ../shared
