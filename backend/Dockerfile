@@ -22,11 +22,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy backend code
 COPY backend/ /app/backend/
 
-# Default environment variables
-ENV PORT=8000
-
 # Expose the port
-EXPOSE $PORT
+EXPOSE ${PORT:-8080}
 
 # Start the application
-CMD uvicorn main:app --host 0.0.0.0 --port $PORT
+CMD uvicorn main:app --host 0.0.0.0 --port ${PORT:-8080}
