@@ -1,7 +1,7 @@
 from pydantic import BaseModel, EmailStr, Field, field_serializer, SerializationInfo
 from enum import Enum
 from typing import Optional, Dict, Any
-from datetime import datetime
+from datetime import datetime, timezone
 
 """
 Database structure:
@@ -73,7 +73,7 @@ class HackathonBase(BaseModel):
 
 class Hackathon(HackathonBase):
     id: Optional[str] = Field(None, alias="_id")
-    created_at: datetime = Field(default_factory=datetime.now)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     
     model_config = {
         "populate_by_name": True,

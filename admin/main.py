@@ -93,7 +93,6 @@ async def submit_form(request: Request, db = Depends(get_db)):
             url=data['url'],
             notes=data.get('notes', ''),
             status=HackathonStatus(data['status']),
-            created_at=datetime.now()
         )
 
         db_id = collection.insert_one(hackathon.to_mongo())
