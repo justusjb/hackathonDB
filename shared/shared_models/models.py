@@ -1,7 +1,7 @@
-from pydantic import BaseModel, EmailStr, Field, field_serializer, SerializationInfo
+from pydantic import BaseModel, EmailStr, Field, field_serializer, SerializationInfo, field_validator, HttpUrl
 from enum import Enum
 from typing import Optional, Dict, Any
-from datetime import datetime
+from datetime import datetime, timezone
 
 """
 Database structure:
@@ -66,19 +66,32 @@ class HackathonBase(BaseModel):
     name: str
     date: DateRange
     location: Location
-    url: str
+    url: HttpUrl
     notes: Optional[str] = None
     status: HackathonStatus
+
+    @field_validator('url', mode='before')
+    @classmethod
+    def ensure_scheme_in_url(cls, v: str) -> str:
+        """Adds 'https://' to the URL if scheme is missing."""
+        # Check if v is a string, is not empty, and lacks a scheme
+        if isinstance(v, str) and v and not (v.startswith('http://') or v.startswith('https://')):
+            return f'https://{v}'
+        return v
 
 
 class Hackathon(HackathonBase):
     id: Optional[str] = Field(None, alias="_id")
-    created_at: datetime = Field(default_factory=datetime.now)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     
     model_config = {
         "populate_by_name": True,
         "arbitrary_types_allowed": True,
     }
+
+    @field_serializer('url')
+    def serialize_url(self, v: HttpUrl) -> str:
+        return str(v)
     
     @field_serializer('created_at')
     def serialize_datetime(self, dt: datetime, info: SerializationInfo) -> str | datetime:

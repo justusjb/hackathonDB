@@ -7,12 +7,12 @@ CURRENT_PATH=$(pwd)
 osascript <<EOF
 tell application "Terminal"
     -- Execute first command in the current tab
-    do script "cd $CURRENT_PATH/backend && source .venv/bin/activate && python main.py"
+    do script "cd $CURRENT_PATH/backend && source .venv/bin/activate && pip install -e ../shared && python main.py" in front window
     
     -- Create a new tab for the admin service
     tell application "System Events" to tell process "Terminal" to keystroke "t" using command down
     delay 0.5
-    do script "cd $CURRENT_PATH/admin && source .venv/bin/activate && python main.py" in front window
+    do script "cd $CURRENT_PATH/admin && source .venv/bin/activate && pip install -e ../shared && python main.py" in front window
     
     -- Create a new tab for the frontend service
     tell application "System Events" to tell process "Terminal" to keystroke "t" using command down
