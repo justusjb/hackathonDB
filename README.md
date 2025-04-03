@@ -29,14 +29,19 @@ uvicorn main:app --reload
 ```
 
 #### On DigitalOcean:
+There is currently some magic hackery going on with Docker because we are using a monorepo. In order for DigitalOcean to deploy, the app spec needs to be edited:
 ```
-uvicorn main:app --host 0.0.0.0 --port 8080
+services:
+- dockerfile_path: backend/Dockerfile
+  envs:
+  - key: MONGODB_URI
 ```
+Make sure to include the `dockerfile_path` and not to include a build_command or install_command 
 
 ### Frontend
 In the `frontend` folder install the dependencies and start the frontend server:
 
 ```
-npm install
-npm run dev
+bun install
+bun run dev
 ```
