@@ -7,7 +7,7 @@ import uvicorn
 from settings import settings
 import httpx
 import os
-from shared_models import Hackathon, EmailSubmission, HackathonStatus, Location, Coordinates, DateRange
+from shared_models import Hackathon, HackathonStatus, Location, Coordinates, DateRange
 from database import get_db
 
 app = FastAPI()
@@ -50,11 +50,18 @@ def get_city_data(city):
             'country' not in all_city_data['components']):
         raise Exception("City components not found. This is a really weird error that is not supposed to happen.")
 
-    return {"lat": all_city_data['geometry']['lat'],
-            "long": all_city_data['geometry']['lng'],
-            "city": all_city_data['components']['_normalized_city'],
-            "state": all_city_data['components']['state'] if 'state' in all_city_data['components'] else None,
-            "country": all_city_data['components']['country']}
+    components = all_city_data.get('components', {})
+    geometry = all_city_data.get('geometry', {})
+    
+    return Location(
+        city=components['_normalized_city'],
+        state=components.get('state'),  # Using get because state is optional 
+        country=components['country'],
+        coordinates=Coordinates(
+            lat=geometry['lat'],
+            long=geometry['lng']
+        )
+    )
 
 
 @app.post("/submit")
@@ -70,18 +77,7 @@ async def submit_form(request: Request, db = Depends(get_db)):
 
         # Handle city
         input_city = data['city']
-        city_data = get_city_data(input_city)
-
-        # Build location model
-        location = Location(
-            city=city_data['city'],
-            state=city_data['state'],
-            country=city_data['country'],
-            coordinates=Coordinates(
-                lat=city_data['lat'],
-                long=city_data['long']
-            )
-        )
+        location = get_city_data(input_city)
 
         # Build date range model
         date_range = DateRange(
