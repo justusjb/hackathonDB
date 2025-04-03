@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_serializer
 from enum import Enum
 from typing import Optional, Dict, Any
 from datetime import datetime
@@ -50,6 +50,10 @@ class DateRange(BaseModel):
     start_date: datetime
     end_date: datetime
 
+    @field_serializer('start_date', 'end_date')
+    def serialize_datetime(self, dt: datetime) -> str:
+        return dt.isoformat()
+
 
 class HackathonStatus(str, Enum):
     ANNOUNCED = "announced"
@@ -71,18 +75,19 @@ class Hackathon(HackathonBase):
     id: Optional[str] = Field(None, alias="_id")
     created_at: datetime = Field(default_factory=datetime.now)
     
-    class Config:
-        # Allow MongoDB _id to be used
-        allow_population_by_field_name = True
-        # Make model work with MongoDB
-        json_encoders = {
-            datetime: lambda dt: dt.isoformat()
-        }
+    model_config = {
+        "populate_by_name": True,
+        "arbitrary_types_allowed": True,
+    }
     
+    @field_serializer('created_at')
+    def serialize_datetime(self, dt: datetime) -> str:
+        return dt.isoformat()
+
     # Method to convert to MongoDB dictionary
     def to_mongo(self) -> Dict[str, Any]:
         # Convert to dict that MongoDB can store
-        data = self.dict(by_alias=True, exclude={"id"})
+        data = self.model_dump(by_alias=True, exclude={"id"})
         if self.id:
             data["_id"] = self.id
         return data
@@ -93,4 +98,4 @@ class Hackathon(HackathonBase):
         if "_id" in data and data["_id"]:
             # Convert MongoDB ObjectId to string
             data["_id"] = str(data["_id"])
-        return cls.parse_obj(data)
+        return cls.model_validate(data)
