@@ -14,7 +14,7 @@
         name: string;
         date: { start_date: string; end_date: string };
         location: { city: string; country: string };
-        URL: string;
+        url: string;
         status: string;
     };
 

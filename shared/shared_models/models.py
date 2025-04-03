@@ -19,7 +19,7 @@ location
   coordinates
       lat
       long
-URL
+url
 Notes
 status
 created_at
@@ -66,7 +66,7 @@ class HackathonBase(BaseModel):
     name: str
     date: DateRange
     location: Location
-    url: str = Field(alias='URL') # UPDATE THIS as part of migration from URL to url. just use "url: str"
+    url: str
     notes: Optional[str] = None
     status: HackathonStatus
 
@@ -99,3 +99,11 @@ class Hackathon(HackathonBase):
             # Convert MongoDB ObjectId to string
             data["_id"] = str(data["_id"])
         return cls.model_validate(data)
+
+    @classmethod
+    def safe_from_mongo(cls, data: Dict[str, Any]) -> Optional["Hackathon"]:
+        try:
+            return cls.from_mongo(data)
+        except Exception as e:
+            print(f"Error parsing hackathon: {e}")
+            return None

@@ -11,7 +11,7 @@ public_router = APIRouter()
 @public_router.get("/hackathons")
 async def read_hackathons(db = Depends(get_db)):
     collection = db.hackathons
-    hackathons = [Hackathon.from_mongo(doc) for doc in collection.find({})]
+    hackathons = [h for h in (Hackathon.safe_from_mongo(doc) for doc in collection.find({})) if h is not None]    
     return hackathons
 
 
