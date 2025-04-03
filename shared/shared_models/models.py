@@ -19,7 +19,7 @@ location
   coordinates
       lat
       long
-URL
+url
 Notes
 status
 created_at
@@ -66,7 +66,7 @@ class HackathonBase(BaseModel):
     name: str
     date: DateRange
     location: Location
-    url: str = Field(alias='URL') # UPDATE THIS as part of migration from URL to url. just use "url: str"
+    url: str
     notes: Optional[str] = None
     status: HackathonStatus
 

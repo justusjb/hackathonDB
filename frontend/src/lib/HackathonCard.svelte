@@ -3,7 +3,7 @@
         name: string;
         date: { start_date: string; end_date: string };
         location: { city: string; country: string };
-        URL: string;
+        url: string;
         status: string;
     };
 
@@ -39,7 +39,7 @@
         <p class="text-gray-600 dark:text-gray-300">{hackathon.location.city}, {hackathon.location.country}</p>
         <p class="text-gray-600 dark:text-gray-300">Start: {formatDate(hackathon.date.start_date)}</p>
         <p class="text-gray-600 dark:text-gray-300">End:  {formatDate(hackathon.date.end_date)}</p>
-        <a href={hackathon.URL} class="text-blue-500 hover:underline mt-2 inline-block dark:text-blue-400" target="_blank" rel="noopener noreferrer">Website</a>
+        <a href={hackathon.url} class="text-blue-500 hover:underline mt-2 inline-block dark:text-blue-400" target="_blank" rel="noopener noreferrer">Website</a>
         <div class="flex items-center mt-2">
             <div class={`w-3 h-3 rounded-full ${getStatusClass(hackathon.status)} mr-2`}></div>
             <p class="text-gray-600 dark:text-gray-300">Status: {hackathon.status.replace('_', ' ')}</p>
