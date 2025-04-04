@@ -62,6 +62,12 @@ class HackathonStatus(str, Enum):
     EXPECTED = "expected"
 
 
+class InboxStatus(str, Enum):
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+
+
 class HackathonBase(BaseModel):
     name: str
     date: DateRange
@@ -80,6 +86,30 @@ class HackathonBase(BaseModel):
         return v
 
 
+class InboxItem(BaseModel):
+    id: Optional[str] = Field(None, alias="_id") # MongoDB ID
+
+    # Fields mirroring HackathonBase, but optional
+    name: Optional[str] = None
+    date: Optional[DateRange] = None
+    location: Optional[str] = None  # Store as simple string for inbox
+    url: Optional[str] = None
+    notes: Optional[str] = None
+    status: Optional[HackathonStatus] = None
+
+    # Inbox-specific metadata
+    source_url: Optional[str] = None
+    scraper_name: Optional[str] = None
+    scraped_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    review_status: InboxStatus = Field(default=InboxStatus.PENDING)
+
+    model_config = {
+        "populate_by_name": True,
+        "arbitrary_types_allowed": True,
+        "use_enum_values": True,
+    }
+
+
 class Hackathon(HackathonBase):
     id: Optional[str] = Field(None, alias="_id")
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
@@ -87,6 +117,7 @@ class Hackathon(HackathonBase):
     model_config = {
         "populate_by_name": True,
         "arbitrary_types_allowed": True,
+        "use_enum_values": True,
     }
 
     @field_serializer('url')
