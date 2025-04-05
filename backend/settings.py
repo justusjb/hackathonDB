@@ -8,7 +8,7 @@ DOTENV_PATH = Path(__file__).parent / '.env'
 
 class Settings(BaseSettings):
     # Environment configuration
-    ENVIRONMENT: Literal["production", "staging"] 
+    ENVIRONMENT: Literal["production", "staging", "test"] 
     MONGODB_URI: str
     ADMIN_API_KEY: str
     
@@ -16,9 +16,23 @@ class Settings(BaseSettings):
     @property
     def is_production(self) -> bool:
         return self.ENVIRONMENT == "production"
+
+    @property
+    def is_testing(self) -> bool:
+        # Check if pytest is running via standard env var it can set
+        return os.getenv("PYTEST_RUNNING") == "1" or self.ENVIRONMENT == "test"
     
     @property
     def mongodb_database(self) -> str:
+        if self.is_testing:
+            return "hackathons_pytest"
+        elif self.is_production:
+            return "hackathons_prod"
+        else:
+            return "hackathons_test_1"
+
+
+
         return "hackathons_prod" if self.is_production else "hackathons_test_1"
     
     class Config:
