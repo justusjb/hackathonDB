@@ -10,3 +10,4 @@ beautifulsoup4
 -e ../shared
 pytest
 pytest-env
+requests
