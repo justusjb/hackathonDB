@@ -30,4 +30,4 @@ ENV PYTHONPATH=/app
 EXPOSE ${PORT:-8080}
 
 # Start the application
-CMD uvicorn main:app --host 0.0.0.0 --port ${PORT:-8080}
+CMD uvicorn backend.main:app --host 0.0.0.0 --port ${PORT:-8080}
