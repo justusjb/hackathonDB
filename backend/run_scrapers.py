@@ -2,11 +2,11 @@ import logging
 from typing import List
 import time
 
-from .scrapers.base_scraper import BaseScraper
-from .scrapers.mlh_scraper import MlhScraper
-from .scrapers.mock_scraper import MockScraper
+from scrapers.base_scraper import BaseScraper
+from scrapers.mlh_scraper import MlhScraper
+from scrapers.mock_scraper import MockScraper
 # Import the processing function we will create in Step 4
-from .inbox_processor import process_scraped_items
+from inbox_processor import process_scraped_items
 from shared_models.models import InboxItem
 
 # Configure basic logging
