@@ -5,4 +5,6 @@ slowapi
 pydantic>=2.11.0
 pydantic[email]
 pydantic-settings
+lxml
+beautifulsoup4
 -e ../shared
