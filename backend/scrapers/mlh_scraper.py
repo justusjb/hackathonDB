@@ -1,6 +1,9 @@
 from .base_scraper import BaseScraper
-from shared_models.models import InboxItem
+from shared_models.models import InboxItem, DateRange
 from typing import List
+from bs4 import BeautifulSoup
+from datetime import datetime, timezone
+import requests
 
 
 def create_daterange(start_str: str | None, end_str: str | None) -> DateRange | None:
@@ -45,12 +48,12 @@ class MlhScraper(BaseScraper):
         scraped_items: List[InboxItem] = []
 
         try:
-            response = requests.get(self.target_url, headers=HEADERS, timeout=15)
+            response = requests.get(self.target_url, headers=self.HEADERS, timeout=15)
             response.raise_for_status() # Raise error if there is an HTTP error
             soup = BeautifulSoup(response.content, 'lxml')
             print("  Successfully fetched and parsed MLH page.")
         except requests.exceptions.RequestException as e:
-            print(f"Error fetching {URL}: {e}")
+            print(f"Error fetching {self.target_url}: {e}")
             return []
 
         # --- Find upcoming events container ---
