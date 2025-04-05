@@ -7,12 +7,10 @@ DOTENV_PATH = Path(__file__).parent / '.env'
 
 
 class Settings(BaseSettings):
-    # Environment configuration
     ENVIRONMENT: Literal["production", "staging", "test"] 
     MONGODB_URI: str
     ADMIN_API_KEY: str
     
-    # Computed properties
     @property
     def is_production(self) -> bool:
         return self.ENVIRONMENT == "production"
@@ -31,9 +29,10 @@ class Settings(BaseSettings):
         else:
             return "hackathons_test_1"
     
-    class Config:
-        env_file = DOTENV_PATH
-        case_sensitive = False
+    model_config = {
+        "env_file": DOTENV_PATH,
+        "case_sensitive": False,
+    }
 
 # Create a global settings instance
 settings = Settings()
