@@ -27,6 +27,9 @@ Then start the backend server:
 ```
 uvicorn main:app --reload
 ```
+#### Tests
+Inside the backend venv, navigate to root and run `pytest`
+
 
 #### On DigitalOcean:
 There is currently some magic hackery going on with Docker because we are using a monorepo. In order for DigitalOcean to deploy, the app spec needs to be edited:

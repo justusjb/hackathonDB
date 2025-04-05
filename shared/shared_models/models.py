@@ -1,7 +1,8 @@
-from pydantic import BaseModel, EmailStr, Field, field_serializer, SerializationInfo, field_validator, HttpUrl
+from pydantic import BaseModel, EmailStr, Field, field_serializer, SerializationInfo, field_validator, HttpUrl, BeforeValidator
 from enum import Enum
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, Annotated
 from datetime import datetime, timezone
+from bson import ObjectId
 
 """
 Database structure:
@@ -24,6 +25,11 @@ Notes
 status
 created_at
 """
+
+PyObjectId = Annotated[
+    str,
+    BeforeValidator(lambda v: str(v) if isinstance(v, ObjectId) else v)
+]
 
 class EmailSubmission(BaseModel):
     email: EmailStr
@@ -87,7 +93,7 @@ class HackathonBase(BaseModel):
 
 
 class InboxItem(BaseModel):
-    id: Optional[str] = Field(None, alias="_id") # MongoDB ID
+    id: Optional[PyObjectId] = Field(None, alias="_id") # MongoDB ID
 
     # Fields mirroring HackathonBase, but optional
     name: Optional[str] = None
@@ -111,7 +117,7 @@ class InboxItem(BaseModel):
 
 
 class Hackathon(HackathonBase):
-    id: Optional[str] = Field(None, alias="_id")
+    id: Optional[PyObjectId] = Field(None, alias="_id")
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     
     model_config = {
