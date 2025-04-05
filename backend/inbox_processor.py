@@ -5,7 +5,7 @@ from pymongo.database import Database
 from pymongo.errors import DuplicateKeyError # Good to handle just in case
 
 # Adjust import paths as needed
-from .database import get_db
+from database import get_db
 from shared_models.models import InboxItem, InboxStatus
 
 # Get logger instance (child logger of the one in run_scrapers if run via that)
