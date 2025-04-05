@@ -22,7 +22,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy backend code
 COPY backend/ /app/backend/
 
-WORKDIR /app
+# --- Tell Python where to find top-level packages like 'backend' itself ---
+# This allows finding 'backend.main' even when CWD is /app/backend
+ENV PYTHONPATH=/app
 
 # Expose the port
 EXPOSE ${PORT:-8080}
