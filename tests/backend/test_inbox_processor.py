@@ -7,8 +7,9 @@ from pymongo.database import Database
 from backend.inbox_processor import process_scraped_items, is_duplicate
 from backend.scrapers.mock_scraper import MockScraper
 from backend.database import get_db # To get the DB connection
-from shared_models.models import InboxItem, Hackathon, DateRange, HackathonStatus, InboxStatus # Import necessary models
+from shared_models.models import InboxItem, Hackathon, DateRange, HackathonStatus, InboxStatus, Location, Coordinates
 from datetime import datetime, timedelta, timezone
+from pydantic import HttpUrl
 
 # --- Pytest Fixtures ---
 
@@ -20,15 +21,15 @@ def db() -> Database:
     assert "pytest" in database.name # Safety check: Ensure we're not using prod/staging DB
 
     # Clean relevant collections before the test runs
-    print("--- Cleaning inbox_items and hackathons collections ---")
-    database['inbox_items'].delete_many({})
+    print("--- Cleaning inbox and hackathons collections ---")
+    database['inbox'].delete_many({})
     database['hackathons'].delete_many({})
 
     yield database # Provide the database object to the test
 
     # Teardown (optional): Clean up again after the test if desired
     # print("--- Cleaning up collections post-test ---")
-    # database['inbox_items'].delete_many({})
+    # database['inbox'].delete_many({})
     # database['hackathons'].delete_many({})
 
 
@@ -52,7 +53,7 @@ def test_process_new_items(db: Database, mock_items: list[InboxItem]):
     assert len(new_items_to_process) >= 2, "Test setup error: Need at least 2 unique mock items"
 
     # Sanity check: Ensure DB is empty before processing
-    inbox_collection = db['inbox_items']
+    inbox_collection = db['inbox']
     assert inbox_collection.count_documents({}) == 0
 
     # --- Act ---
@@ -76,8 +77,8 @@ def test_process_new_items(db: Database, mock_items: list[InboxItem]):
 
 
 def test_skip_duplicate_in_inbox(db: Database, mock_items: list[InboxItem]):
-    """Test that an item already present in inbox_items (by URL) is skipped."""
-    inbox_collection = db['inbox_items']
+    """Test that an item already present in inbox (by URL) is skipped."""
+    inbox_collection = db['inbox']
     hackathons_collection = db['hackathons']
 
     # --- Arrange ---
@@ -118,40 +119,65 @@ def test_skip_duplicate_in_inbox(db: Database, mock_items: list[InboxItem]):
 
 def test_skip_duplicate_in_main_collection(db: Database, mock_items: list[InboxItem]):
     """Test that an item already present in the main hackathons collection (by URL) is skipped."""
-    inbox_collection = db['inbox_items']
+    inbox_collection = db['inbox']
     hackathons_collection = db['hackathons']
 
     # --- Arrange ---
-    # Find an item to pre-insert into the main collection
-    item_to_duplicate = next((item for item in mock_items if "FakeConf Beta" in item.name), None)
-    assert item_to_duplicate is not None
+    # 1. Choose a URL from mock_items that we want to exist in the main collection
+    duplicate_url_str = "https://example.com/fakeconf-beta" # Explicitly choose the URL
+    duplicate_url = HttpUrl(duplicate_url_str)
 
-    # Manually insert into the *hackathons* collection
-    # We need a valid Hackathon object - create one based on the InboxItem
-    hackathon_data = item_to_duplicate.model_dump(mode='python', exclude={'review_status', 'scraped_at', 'source_url', 'scraper_name'}) # Exclude inbox-specific fields
-    hackathon_data['status'] = HackathonStatus.UPCOMING # Give it a valid status
-    hackathon = Hackathon.model_validate(hackathon_data)
-    hackathon_dict = hackathon.model_dump(mode='python', by_alias=True)
+    # 2. Create a "real" Hackathon object with this URL
+    # Make sure you have Location and DateRange imported
+    hackathon_to_insert = Hackathon(
+        name="FakeConf Beta Pre-existing", # Can have a different name, URL is the key
+        date=DateRange(
+            start_date=datetime.now(timezone.utc) + timedelta(days=30),
+            end_date=datetime.now(timezone.utc) + timedelta(days=32)
+        ),
+        location=Location(
+            city="Test City",
+            state="TS",
+            country="Testland",
+            coordinates=Coordinates(lat=0.0, long=0.0)
+        ),
+        url=duplicate_url, # Use the chosen duplicate URL
+        notes="This hackathon was pre-inserted for testing duplicates.",
+        status=HackathonStatus.ANNOUNCED
+        # created_at is handled by default_factory
+    )
+
+    # 3. Insert it into the 'hackathons' collection
+    # Use model_dump or the existing to_mongo method if preferred
+    hackathon_dict = hackathon_to_insert.model_dump(mode='python', by_alias=True)
+    # Remove 'id' if None before insertion, although model_dump might handle this
     if '_id' in hackathon_dict and hackathon_dict['_id'] is None: del hackathon_dict['_id']
 
     insert_result = hackathons_collection.insert_one(hackathon_dict)
-    print(f"Pre-inserted item ID into hackathons: {insert_result.inserted_id}")
+    print(f"Pre-inserted hackathon ID into hackathons: {insert_result.inserted_id}")
     assert hackathons_collection.count_documents({}) == 1
-    assert inbox_collection.count_documents({}) == 0
+    assert inbox_collection.count_documents({}) == 0 # Inbox should be empty
 
     # --- Act ---
+    # Process the mock items, which includes one with url = duplicate_url
     process_scraped_items(mock_items)
 
     # --- Assert ---
-    # All items from mock_items EXCEPT the one matching the URL in hackathons should be in the inbox
-    expected_inbox_count = len({item.url for item in mock_items if item.url}) - 1
+    # All items from mock_items EXCEPT the one matching the duplicate_url should be in the inbox
+    # Count unique URLs from mock_items first
+    unique_mock_urls = {str(item.url) for item in mock_items if item.url}
+    expected_inbox_count = len(unique_mock_urls) - 1 # Subtract 1 for the duplicated URL
+    # Ensure the duplicate url was actually in the mock items
+    assert duplicate_url_str in unique_mock_urls, "Test logic error: duplicate URL not found in mock items"
+
+    print(f"Expected inbox count: {expected_inbox_count}, Actual: {inbox_collection.count_documents({})}")
     assert inbox_collection.count_documents({}) == expected_inbox_count
 
     # Check that the specific duplicated item is NOT in the inbox
-    assert inbox_collection.find_one({"url": str(item_to_duplicate.url)}) is None
+    assert inbox_collection.find_one({"url": duplicate_url_str}) is None
 
-    # Ensure the main collection wasn't touched
-    assert hackathons_collection.count_documents({}) == 1
+    # Check that the pre-existing hackathon is still in the main collection
+    assert hackathons_collection.count_documents({"url": duplicate_url_str}) == 1
 
 
 # TODO: Add more tests?
