@@ -8,3 +8,5 @@ pydantic-settings
 lxml
 beautifulsoup4
 -e ../shared
+pytest
+pytest-env

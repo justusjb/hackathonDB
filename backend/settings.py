@@ -1,7 +1,7 @@
 from pydantic_settings import BaseSettings
 from typing import Literal
 from pathlib import Path
-
+import os
 
 DOTENV_PATH = Path(__file__).parent / '.env'
 
@@ -30,10 +30,6 @@ class Settings(BaseSettings):
             return "hackathons_prod"
         else:
             return "hackathons_test_1"
-
-
-
-        return "hackathons_prod" if self.is_production else "hackathons_test_1"
     
     class Config:
         env_file = DOTENV_PATH
