@@ -11,7 +11,9 @@ from .models import (
     DateRange,
     HackathonStatus,
     HackathonBase,
-    Hackathon
+    Hackathon,
+    InboxItem,
+    InboxStatus
 )
 
 # Define what's available when using `from shared_models import *`
@@ -23,5 +25,7 @@ __all__ = [
     "DateRange",
     "HackathonStatus",
     "HackathonBase",
-    "Hackathon"
+    "Hackathon",
+    "InboxItem",
+    "InboxStatus"
 ]
