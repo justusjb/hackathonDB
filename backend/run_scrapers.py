@@ -6,7 +6,7 @@ from .scrapers.base_scraper import BaseScraper
 from .scrapers.mlh_scraper import MlhScraper
 from .scrapers.mock_scraper import MockScraper
 # Import the processing function we will create in Step 4
-# from .inbox_processor import process_scraped_items # Placeholder for Step 4
+from .inbox_processor import process_scraped_items
 from shared_models.models import InboxItem
 
 # Configure basic logging
@@ -24,7 +24,7 @@ def get_active_scrapers() -> List[BaseScraper]:
         # Example: Scrape MLH for the current year + 1 (adjust year as needed)
         from datetime import date
         current_year = date.today().year
-        scrapers.append(MlhScraper(year=current_year)) # Use both current and next year in the future
+        #scrapers.append(MlhScraper(year=current_year)) # Use both current and next year in the future
     except ValueError as e:
         logger.error(f"Failed to initialize MlhScraper: {e}")
     except Exception as e:
@@ -70,10 +70,8 @@ def run_all_scrapes():
     logger.info(f"--- Scraping cycle finished. Collected {len(all_results)} total items. ---")
 
     # --- Step 4 Placeholder ---
-    # Pass the aggregated results to the processing function (to be created)
     logger.info("Proceeding to process scraped items...")
-    # process_scraped_items(all_results) # Uncomment and implement in Step 4
-    print(f"Processing {len(all_results)} items...") # Temporary print
+    process_scraped_items(all_results)
 
     logger.info("Scraping and processing initiation complete.")
 

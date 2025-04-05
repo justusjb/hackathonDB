@@ -1,5 +1,5 @@
 from pymongo import MongoClient
-from settings import settings
+from .settings import settings
 
 # Create MongoDB client at module level
 mongo_client = MongoClient(settings.MONGODB_URI)
