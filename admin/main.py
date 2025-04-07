@@ -104,19 +104,32 @@ async def submit_form(request: Request, db = Depends(get_db)):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@app.get("/api/test-scraping")
-async def test_scraping_access():
-    """Test that we can access the secured scraping endpoint"""
+@app.post("/trigger-scrape")
+async def trigger_scrape():
+    """
+    Trigger a new scraping run by calling the backend's trigger endpoint.
+    This endpoint is designed to be called from the admin panel's "Run Scrapers" button.
+    """
     backend_url = os.getenv("BACKEND_URL", "http://localhost:8000")
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.get(
-                f"{backend_url}/scraping/start",
+            response = await client.post(
+                f"{backend_url}/scraping/trigger",
                 headers={"X-API-Key": settings.ADMIN_API_KEY},
                 timeout=10.0
             )
             response.raise_for_status()
             return response.json()
+    except httpx.HTTPStatusError as e:
+        # Handle specific HTTP errors (like rate limiting or already running)
+        status_code = e.response.status_code
+        try:
+            error_data = e.response.json()
+            error_message = error_data.get("message", str(e))
+        except:
+            error_message = str(e)
+        
+        raise HTTPException(status_code=status_code, detail=error_message)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error connecting to backend: {str(e)}")
 
@@ -162,4 +175,4 @@ async def get_inbox_items(status: str | None = None, db = Depends(get_db)):
 
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8001, reload=True)
+    uvicorn.run("main:app", host="localhost", port=8001, reload=True)

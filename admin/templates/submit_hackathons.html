@@ -140,35 +140,61 @@
     </form>
     <div id="message"></div>
 </div>
-<div style="margin-top: 20px; padding: 20px; background-color: #f0f0f0; border-radius: 5px;">
-    <h3>Admin Controls</h3>
-    <button id="test-scraping-btn" class="btn btn-secondary">Test Scraping Access</button>
-    <div id="scraping-result" style="margin-top: 10px; padding: 10px; background-color: #fff; border-radius: 3px; display: none;"></div>
+<div class="card">
+    <div class="card-header">
+        <h2 class="h5 mb-0">Scraper Controls</h2>
+    </div>
+    <div class="card-body">
+        <button id="trigger-scrape-btn" class="btn btn-primary">Run Scrapers</button>
+        <div id="scraping-result" class="mt-3" style="display: none;"></div> 
+    </div>
 </div>
 
 <script>
-    document.getElementById('test-scraping-btn').addEventListener('click', async function() {
-        try {
-            const response = await fetch('/api/test-scraping');
-            const resultDiv = document.getElementById('scraping-result');
-            
-            if (response.ok) {
-                const data = await response.json();
-                resultDiv.textContent = 'Successfully connected to scraping API: ' + JSON.stringify(data);
-                resultDiv.style.color = 'green';
-            } else {
-                resultDiv.textContent = 'Failed to connect to scraping API: ' + response.statusText;
-                resultDiv.style.color = 'red';
+document.getElementById('trigger-scrape-btn').addEventListener('click', async function() {
+    const button = this;
+    const resultDiv = document.getElementById('scraping-result');
+    
+    // Disable button and show loading state (optional)
+    button.disabled = true;
+    button.textContent = 'Running...';
+    resultDiv.style.display = 'none'; // Hide previous message
+    resultDiv.className = 'mt-3 alert'; // Reset classes
+
+    try {
+        const response = await fetch('/trigger-scrape', { // Calls the endpoint in admin/main.py
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json' 
+                // No 'X-API-Key' needed here; admin/main.py handles calling backend securely
             }
-            resultDiv.style.display = 'block';
-        } catch (error) {
-            console.error('Error:', error);
-            document.getElementById('scraping-result').textContent = 'Error: ' + error.message;
-            document.getElementById('scraping-result').style.color = 'red';
-            document.getElementById('scraping-result').style.display = 'block';
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            // Handle errors from the backend (like rate limit, already running)
+            throw new Error(data.detail || `HTTP error! Status: ${response.status}`);
         }
-    });
-    </script>
+
+        // Success!
+        resultDiv.textContent = data.message || 'Scraping initiated successfully!';
+        resultDiv.classList.add('alert-success');
+        resultDiv.style.display = 'block';
+
+    } catch (error) {
+        // Handle network errors or errors thrown above
+        console.error('Error triggering scrape:', error);
+        resultDiv.textContent = 'Error: ' + error.message;
+        resultDiv.classList.add('alert-danger');
+        resultDiv.style.display = 'block';
+    } finally {
+        // Re-enable button
+        button.disabled = false;
+        button.textContent = 'Run Scrapers';
+    }
+});
+</script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
