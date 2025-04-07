@@ -18,23 +18,11 @@ def get_api_key(api_key: str = Security(api_key_scheme)):
 
 # Rate limiting setup
 last_scrape_time = None
-MIN_SCRAPE_INTERVAL = timedelta(minutes=5)  # Minimum time between scrapes
+MIN_SCRAPE_INTERVAL = timedelta(seconds=30)  # Minimum time between scrapes
 
 logger = logging.getLogger(__name__)
 
 scraping_router = APIRouter()
-
-
-@scraping_router.get("/start", dependencies=[Depends(get_api_key)])
-async def start_scrape(db = Depends(get_db)):
-    # Placeholder for scraping logic
-    return JSONResponse(content={"status": "Scraping initiated"})
-
-@scraping_router.get("/status", dependencies=[Depends(get_api_key)])
-async def scrape_status(db = Depends(get_db)):
-    # Placeholder for scraping status
-    return JSONResponse(content={"status": "Scraping in progress"})
-
 
 # Store the status of the last scraping job
 scraping_status = {
@@ -84,6 +72,7 @@ async def trigger_scrape(background_tasks: BackgroundTasks):
                 "status": "error",
                 "message": "A scraping job is already in progress"
             }
+
         )
     
     # Check rate limiting
@@ -108,6 +97,7 @@ async def trigger_scrape(background_tasks: BackgroundTasks):
             "message": "Scraping initiated in background"
         }
     )
+
 
 @scraping_router.get("/status", dependencies=[Depends(get_api_key)])
 async def get_scrape_status():
