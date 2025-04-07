@@ -121,5 +121,45 @@ async def test_scraping_access():
         raise HTTPException(status_code=500, detail=f"Error connecting to backend: {str(e)}")
 
 
+@app.get("/inbox")
+async def get_inbox_items(status: str | None = None, db = Depends(get_db)):
+    """
+    Get all items from the inbox collection with optional status filtering.
+    """
+    try:
+        # Get the inbox collection
+        collection = db.inbox
+        
+        # Build the query based on status parameter
+        query = {}
+        if status:
+            query["review_status"] = status.lower()
+        
+        # Fetch all matching documents
+        cursor = collection.find(query)
+        
+        # Convert cursor to list and process items
+        items = []
+        for doc in cursor:
+            # Convert ObjectId to string for JSON serialization
+            doc['_id'] = str(doc['_id'])
+            # Convert datetime objects to ISO format strings
+            if 'date' in doc and doc['date']:
+                if 'start_date' in doc['date']:
+                    doc['date']['start_date'] = doc['date']['start_date'].isoformat()
+                if 'end_date' in doc['date']:
+                    doc['date']['end_date'] = doc['date']['end_date'].isoformat()
+            items.append(doc)
+        
+        return {
+            "status": "success",
+            "data": items,
+            "count": len(items)
+        }
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching inbox items: {str(e)}")
+
+
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8001, reload=True)
