@@ -104,22 +104,75 @@ async def submit_form(request: Request, db = Depends(get_db)):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@app.get("/api/test-scraping")
-async def test_scraping_access():
-    """Test that we can access the secured scraping endpoint"""
+@app.post("/trigger-scrape")
+async def trigger_scrape():
+    """
+    Trigger a new scraping run by calling the backend's trigger endpoint.
+    This endpoint is designed to be called from the admin panel's "Run Scrapers" button.
+    """
     backend_url = os.getenv("BACKEND_URL", "http://localhost:8000")
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.get(
-                f"{backend_url}/scraping/start",
+            response = await client.post(
+                f"{backend_url}/scraping/trigger",
                 headers={"X-API-Key": settings.ADMIN_API_KEY},
                 timeout=10.0
             )
             response.raise_for_status()
             return response.json()
+    except httpx.HTTPStatusError as e:
+        # Handle specific HTTP errors (like rate limiting or already running)
+        status_code = e.response.status_code
+        try:
+            error_data = e.response.json()
+            error_message = error_data.get("message", str(e))
+        except:
+            error_message = str(e)
+        
+        raise HTTPException(status_code=status_code, detail=error_message)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error connecting to backend: {str(e)}")
 
 
+@app.get("/inbox")
+async def get_inbox_items(status: str | None = None, db = Depends(get_db)):
+    """
+    Get all items from the inbox collection with optional status filtering.
+    """
+    try:
+        # Get the inbox collection
+        collection = db.inbox
+        
+        # Build the query based on status parameter
+        query = {}
+        if status:
+            query["review_status"] = status.lower()
+        
+        # Fetch all matching documents
+        cursor = collection.find(query)
+        
+        # Convert cursor to list and process items
+        items = []
+        for doc in cursor:
+            # Convert ObjectId to string for JSON serialization
+            doc['_id'] = str(doc['_id'])
+            # Convert datetime objects to ISO format strings
+            if 'date' in doc and doc['date']:
+                if 'start_date' in doc['date']:
+                    doc['date']['start_date'] = doc['date']['start_date'].isoformat()
+                if 'end_date' in doc['date']:
+                    doc['date']['end_date'] = doc['date']['end_date'].isoformat()
+            items.append(doc)
+        
+        return {
+            "status": "success",
+            "data": items,
+            "count": len(items)
+        }
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching inbox items: {str(e)}")
+
+
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8001, reload=True)
+    uvicorn.run("main:app", host="localhost", port=8001, reload=True)
