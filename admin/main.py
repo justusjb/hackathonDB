@@ -174,5 +174,70 @@ async def get_inbox_items(status: str | None = None, db = Depends(get_db)):
         raise HTTPException(status_code=500, detail=f"Error fetching inbox items: {str(e)}")
 
 
+@app.post("/toggle-database")
+async def toggle_database(request: Request):
+    """
+    Toggle between staging and production database environments.
+    This endpoint updates the ENVIRONMENT setting and all subsequent
+    database operations will use the new environment.
+    """
+    try:
+        data = await request.json()
+        new_environment = data.get("environment")
+        
+        # Validate the environment value
+        if new_environment not in ["production", "staging"]:
+            raise ValueError("Environment must be either 'production' or 'staging'")
+        
+        # Skip if the environment is already set to the requested value
+        if settings.ENVIRONMENT == new_environment:
+            return {
+                "success": True,
+                "message": f"Already using {new_environment} environment",
+                "current_environment": new_environment,
+                "database": settings.mongodb_database
+            }
+        
+        # Update the environment setting
+        settings.update_environment(new_environment)
+        
+        # Verify that the environment setting was actually updated
+        if settings.ENVIRONMENT != new_environment:
+            raise Exception(f"Environment update failed: Still set to {settings.ENVIRONMENT}")
+
+        db = get_db()
+        # Check which database we're actually connected to
+        actual_db_name = db.name
+        expected_db_name = settings.mongodb_database
+        
+        # Verify we're connected to the expected database
+        if actual_db_name != expected_db_name:
+            raise Exception(f"Database switch failed: Connected to {actual_db_name} instead of {expected_db_name}")
+        
+        return {
+            "success": True,
+            "message": f"Switched to {new_environment} environment",
+            "current_environment": new_environment,
+            "database": actual_db_name
+        }
+        
+    except ValueError as ve:
+        raise HTTPException(status_code=422, detail=str(ve))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to toggle database: {str(e)}")
+
+
+@app.get("/current-environment")
+async def get_current_environment(db = Depends(get_db)):
+    """
+    Get the current database environment and database name.
+    """
+    return {
+        "environment": settings.ENVIRONMENT,
+        "database": db.name,
+        "is_production": settings.is_production,
+        "is_testing": settings.is_testing
+    }
+
 if __name__ == "__main__":
     uvicorn.run("main:app", host="localhost", port=8001, reload=True)
