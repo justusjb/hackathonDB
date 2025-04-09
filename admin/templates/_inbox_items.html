@@ -1,0 +1,88 @@
+
+    <div class="card mt-4"> <!-- Add margin-top for spacing -->
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2 class="h5 mb-0">Pending Inbox Items</h2>
+            <button id="refresh-inbox-btn" class="btn btn-sm btn-outline-secondary">Refresh</button>
+        </div>
+        <div class="card-body">
+            <div id="inbox-items-container">
+                <div class="loading">Loading pending items...</div>
+                <!-- Inbox items will be loaded here by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+
+<script>
+    const inboxContainer = document.getElementById('inbox-items-container');
+    const refreshButton = document.getElementById('refresh-inbox-btn');
+    
+    // Function to fetch and display pending inbox items
+    async function loadPendingInboxItems() {
+        inboxContainer.innerHTML = '<div class="loading">Loading pending items...</div>'; // Show loading indicator
+    
+        try {
+            const response = await fetch('/inbox?status=pending'); // Fetch only pending items
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || `HTTP error! Status: ${response.status}`);
+            }
+            const result = await response.json();
+            
+            if (result.status === 'success' && result.data) {
+                renderInboxItems(result.data);
+            } else {
+                throw new Error(result.message || 'Failed to load inbox items.');
+            }
+            
+        } catch (error) {
+            console.error('Error loading inbox items:', error);
+            inboxContainer.innerHTML = `<div class="alert alert-danger">Error loading items: ${error.message}</div>`;
+        }
+    }
+    
+    // Function to render the items in the container
+    function renderInboxItems(items) {
+        if (!items || items.length === 0) {
+            inboxContainer.innerHTML = '<p>No pending items found.</p>';
+            return;
+        }
+    
+        let html = '<ul class="list-group">'; // Using Bootstrap list group for styling
+        items.forEach(item => {
+            // Basic display - customize as needed
+            const name = item.name || 'N/A';
+            const url = item.url ? `<a href="${item.url}" target="_blank">${item.url}</a>` : 'N/A';
+            const source = item.source_url ? `<a href="${item.source_url}" target="_blank">${item.scraper_name || 'Source'}</a>` : (item.scraper_name || 'N/A');
+            const date = item.date && item.date.start_date ? new Date(item.date.start_date).toLocaleDateString() : 'N/A';
+            const location = item.location || 'N/A';
+            const notes = item.notes || '';
+            
+            // Displaying more details in a list item
+            html += `
+                <li class="list-group-item inbox-item mb-2">
+                    <strong>${name}</strong> (${date}) - ${location}<br>
+                    URL: ${url}<br>
+                    Source: ${source} <br>
+                    <small>Notes: ${notes}</small>
+                    <div class="mt-2">
+                       <!-- TODO: Add Approve/Reject buttons here later -->
+                       <button class="btn btn-sm btn-success" data-id="${item._id}">Insert</button>
+                       <button class="btn btn-sm btn-danger" data-id="${item._id}">Reject</button>
+                    </div>
+                </li>`;
+        });
+        html += '</ul>';
+        inboxContainer.innerHTML = html;
+    
+        // TODO: Add event listeners for Approve/Reject buttons here
+    }
+    
+    // Load items when the page loads
+    loadPendingInboxItems();
+    
+    // Add event listener for the refresh button
+    refreshButton.addEventListener('click', loadPendingInboxItems);
+    
+    
+</script>

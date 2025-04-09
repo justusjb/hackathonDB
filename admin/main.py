@@ -18,7 +18,7 @@ templates = Jinja2Templates(directory="templates")
 
 @app.get("/", response_class=HTMLResponse)
 async def read_form(request: Request):
-    return templates.TemplateResponse("submit_hackathons.html", {"request": request})
+    return templates.TemplateResponse("admin_panel.html", {"request": request})
 
 
 def geodata_api_call(query):
