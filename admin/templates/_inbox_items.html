@@ -54,14 +54,15 @@
             const name = item.name || 'N/A';
             const url = item.url ? `<a href="${item.url}" target="_blank">${item.url}</a>` : 'N/A';
             const source = item.source_url ? `<a href="${item.source_url}" target="_blank">${item.scraper_name || 'Source'}</a>` : (item.scraper_name || 'N/A');
-            const date = item.date && item.date.start_date ? new Date(item.date.start_date).toLocaleDateString() : 'N/A';
+            const start_date = item.date && item.date.start_date ? new Date(item.date.start_date).toLocaleDateString() : 'N/A';
+            const end_date = item.date && item.date.end_date ? new Date(item.date.end_date).toLocaleDateString() : 'N/A';
             const location = item.location || 'N/A';
             const notes = item.notes || '';
             
             // Displaying more details in a list item
             html += `
                 <li class="list-group-item inbox-item mb-2">
-                    <strong>${name}</strong> (${date}) - ${location}<br>
+                    <strong>${name}</strong> (${start_date} - ${end_date}) - ${location}<br>
                     URL: ${url}<br>
                     Source: ${source} <br>
                     <small>Notes: ${notes}</small>
