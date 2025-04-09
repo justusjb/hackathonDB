@@ -124,7 +124,23 @@
             flatpickrInstance.changeMonth(calculateMonthDifference(selectedMonth, flatpickrInstance.currentYear, flatpickrInstance.currentMonth));
             flatpickrInstance.clear();
         }
-    
-        initializeMonthPicker(); // Initialize the month picker when the DOM is ready
+        
+        // Check if we already have a date range
+        if (dateInput.value && dateInput.value.includes(" to ")) {
+            // Initialize directly in range mode with existing dates
+            flatpickrInstance = flatpickr(dateInput, {
+                mode: 'range',
+                dateFormat: 'Y-m-d',
+                minDate: 'today',
+                defaultDate: dateInput.value.split(" to "),
+                locale: {
+                    firstDayOfWeek: 1
+                }
+            });
+        } else {
+            // Initialize with month picker as before
+            initializeMonthPicker();
+        }
+
     }
 </script>
