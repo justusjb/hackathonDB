@@ -155,6 +155,9 @@
         const cityInput = document.getElementById('city');
         const urlInput = document.getElementById('url');
         const notesInput = document.getElementById('notes');
+
+        // Populate with item id
+        document.getElementById('inbox-item-id').value = item._id;
         
         // Format date range for the flatpickr input
         let dateRange = '';
