@@ -9,12 +9,16 @@ import httpx
 import os
 from shared_models import Hackathon, HackathonStatus, Location, Coordinates, DateRange
 from database import get_db
+import logging
 
 app = FastAPI()
 
 geocoder = OpenCageGeocode(settings.OPENCAGE_API_KEY)
 
 templates = Jinja2Templates(directory="templates")
+
+logger = logging.getLogger(__name__)
+
 
 @app.get("/", response_class=HTMLResponse)
 async def read_form(request: Request):
@@ -64,6 +68,49 @@ def get_city_data(city):
     )
 
 
+async def approve_inbox_item(db, inbox_item_id: str, session=None) -> bool:
+    """
+    Update an inbox item's status to APPROVED.
+    Raises an exception if the update fails.
+    """
+    result = await db.inbox.update_one(
+        {"_id": ObjectId(inbox_item_id), "status": InboxStatus.PENDING.value},
+        {"$set": {"status": InboxStatus.APPROVED.value}},
+        session=session
+    )
+    
+    if result.matched_count == 0:
+        raise ValueError(f"Inbox item {inbox_item_id} not found or not in PENDING status")
+    if result.modified_count == 0:
+        raise ValueError(f"Failed to update inbox item {inbox_item_id}")
+    
+    return True
+
+
+async def perform_transaction(session, db, hackathon, inbox_item_id=None):
+    """Function to run within a transaction"""
+    # Insert hackathon
+    insert_result = await db.hackathons.insert_one(
+        hackathon.to_mongo(),
+        session=session
+    )
+    
+    # Build response message
+    message = (f"Hackathon added successfully!<br>"
+              f"City: {hackathon.location.city}<br>"
+              f"State: {hackathon.location.state}<br>"
+              f"Country: {hackathon.location.country}<br>"
+              f"ID of the inserted document: {insert_result.inserted_id}")
+
+    # If an inbox item ID was provided, update it
+    if inbox_item_id:
+        await approve_inbox_item(db, inbox_item_id, session)
+        message += "<br>Associated inbox item approved."
+        
+    return {"message": message, "inserted_id": insert_result.inserted_id}
+
+
+
 @app.post("/submit")
 async def submit_form(request: Request, db = Depends(get_db)):
     collection = db.hackathons
@@ -95,9 +142,38 @@ async def submit_form(request: Request, db = Depends(get_db)):
             status=HackathonStatus(data['status']),
         )
 
-        db_id = collection.insert_one(hackathon.to_mongo())
-        return {"message": f"Hackathon added successfully!<br>City: {location.city}<br>State: {location.state}<br>Country: {location.country}"
-                            f"<br>ID of the inserted document: {db_id.inserted_id}"}
+        # Get inbox_item_id if provided
+        inbox_item_id = data.get('inbox_item_id')
+
+        session = db.client.start_session()
+
+        try:
+            # Use 'async with' and 'await' to correctly start and manage the session
+             
+                # Use 'await' to execute the transaction via the helper method
+                # Pass an awaitable lambda that calls our perform_transaction
+            insert_result = await session.with_transaction(
+                lambda s: perform_transaction(s, db, hackathon, inbox_item_id)
+            )
+            # Return success message with the ID
+            return {"message": "Submission successful", "hackathon_id": str(insert_result.inserted_id)}
+
+        except ValueError as ve:
+            # Catch specific logical errors from perform_transaction (like approval failure)
+            raise HTTPException(
+                status_code=400,  # Bad Request seems appropriate
+                detail=f"Transaction failed: {str(ve)}. No changes were made."
+            )
+        except Exception as e:
+            # Catch other unexpected database or transaction errors
+            logger.error(f"Unexpected error during submission transaction: {e}", exc_info=True)
+            raise HTTPException(
+                status_code=500, # Internal Server Error
+                detail=f"An unexpected error occurred during submission: {str(e)}"
+            )
+        finally:
+            await session.end_session()
+
     except ValueError as ve:
         raise HTTPException(status_code=422, detail=f"Validation error: {str(ve)}")
     except Exception as e:
