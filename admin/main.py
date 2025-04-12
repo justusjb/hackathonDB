@@ -7,11 +7,14 @@ import uvicorn
 from settings import settings
 import httpx
 import os
-from shared_models import Hackathon, HackathonStatus, Location, Coordinates, DateRange
-from database import get_db
+from shared_models import Hackathon, HackathonStatus, Location, Coordinates, DateRange, InboxStatus
+from database import get_db, get_async_db, init_db
 import logging
+from bson import ObjectId
 
 app = FastAPI()
+
+init_db(app)
 
 geocoder = OpenCageGeocode(settings.OPENCAGE_API_KEY)
 
@@ -74,8 +77,8 @@ async def approve_inbox_item(db, inbox_item_id: str, session=None) -> bool:
     Raises an exception if the update fails.
     """
     result = await db.inbox.update_one(
-        {"_id": ObjectId(inbox_item_id), "status": InboxStatus.PENDING.value},
-        {"$set": {"status": InboxStatus.APPROVED.value}},
+        {"_id": ObjectId(inbox_item_id), "review_status": InboxStatus.PENDING.value},
+        {"$set": {"review_status": InboxStatus.APPROVED.value}},
         session=session
     )
     
@@ -89,30 +92,22 @@ async def approve_inbox_item(db, inbox_item_id: str, session=None) -> bool:
 
 async def perform_transaction(session, db, hackathon, inbox_item_id=None):
     """Function to run within a transaction"""
-    # Insert hackathon
     insert_result = await db.hackathons.insert_one(
         hackathon.to_mongo(),
         session=session
     )
     
-    # Build response message
-    message = (f"Hackathon added successfully!<br>"
-              f"City: {hackathon.location.city}<br>"
-              f"State: {hackathon.location.state}<br>"
-              f"Country: {hackathon.location.country}<br>"
-              f"ID of the inserted document: {insert_result.inserted_id}")
-
-    # If an inbox item ID was provided, update it
     if inbox_item_id:
-        await approve_inbox_item(db, inbox_item_id, session)
-        message += "<br>Associated inbox item approved."
+        try:
+            await approve_inbox_item(db, inbox_item_id, session)
+        except ValueError as e:
+            raise e
         
-    return {"message": message, "inserted_id": insert_result.inserted_id}
-
+    return insert_result
 
 
 @app.post("/submit")
-async def submit_form(request: Request, db = Depends(get_db)):
+async def submit_form(request: Request, db = Depends(get_async_db)):
     collection = db.hackathons
     try:
         data = await request.json()
@@ -145,7 +140,7 @@ async def submit_form(request: Request, db = Depends(get_db)):
         # Get inbox_item_id if provided
         inbox_item_id = data.get('inbox_item_id')
 
-        session = db.client.start_session()
+        session = await db.client.start_session()
 
         try:
             # Use 'async with' and 'await' to correctly start and manage the session
