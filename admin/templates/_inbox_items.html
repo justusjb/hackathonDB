@@ -54,14 +54,15 @@
             const name = item.name || 'N/A';
             const url = item.url ? `<a href="${item.url}" target="_blank">${item.url}</a>` : 'N/A';
             const source = item.source_url ? `<a href="${item.source_url}" target="_blank">${item.scraper_name || 'Source'}</a>` : (item.scraper_name || 'N/A');
-            const date = item.date && item.date.start_date ? new Date(item.date.start_date).toLocaleDateString() : 'N/A';
+            const start_date = item.date && item.date.start_date ? new Date(item.date.start_date).toLocaleDateString() : 'N/A';
+            const end_date = item.date && item.date.end_date ? new Date(item.date.end_date).toLocaleDateString() : 'N/A';
             const location = item.location || 'N/A';
             const notes = item.notes || '';
             
             // Displaying more details in a list item
             html += `
                 <li class="list-group-item inbox-item mb-2">
-                    <strong>${name}</strong> (${date}) - ${location}<br>
+                    <strong>${name}</strong> (${start_date} - ${end_date}) - ${location}<br>
                     URL: ${url}<br>
                     Source: ${source} <br>
                     <small>Notes: ${notes}</small>
@@ -76,6 +77,136 @@
         inboxContainer.innerHTML = html;
     
         // TODO: Add event listeners for Approve/Reject buttons here
+    }
+    
+    // Load items when the page loads
+    loadPendingInboxItems();
+    
+    // Add event listener for the refresh button
+    refreshButton.addEventListener('click', loadPendingInboxItems);
+    
+
+
+
+    // Logic for inserting items into form
+
+    function renderInboxItems(items) {
+        if (!items || items.length === 0) {
+            inboxContainer.innerHTML = '<p>No pending items found.</p>';
+            return;
+        }
+    
+        let html = '<ul class="list-group">'; // Using Bootstrap list group for styling
+        items.forEach(item => {
+            // Basic display - customize as needed
+            const name = item.name || 'N/A';
+            const url = item.url ? `<a href="${item.url}" target="_blank">${item.url}</a>` : 'N/A';
+            const source = item.source_url ? `<a href="${item.source_url}" target="_blank">${item.scraper_name || 'Source'}</a>` : (item.scraper_name || 'N/A');
+            const start_date = item.date && item.date.start_date ? new Date(item.date.start_date).toLocaleDateString() : 'N/A';
+            const end_date = item.date && item.date.end_date ? new Date(item.date.end_date).toLocaleDateString() : 'N/A';
+            const location = item.location || 'N/A';
+            const notes = item.notes || '';
+            
+            // Displaying more details in a list item
+            html += `
+                <li class="list-group-item inbox-item mb-2">
+                    <strong>${name}</strong> (${start_date} - ${end_date}) - ${location}<br>
+                    URL: ${url}<br>
+                    Source: ${source} <br>
+                    <small>Notes: ${notes}</small>
+                    <div class="mt-2">
+                       <!-- TODO: Add Approve/Reject buttons here later -->
+                       <button class="btn btn-sm btn-success" data-id="${item._id}">Insert</button>
+                       <button class="btn btn-sm btn-danger" data-id="${item._id}">Reject</button>
+                    </div>
+                </li>`;
+        });
+        html += '</ul>';
+        inboxContainer.innerHTML = html;
+    
+        // Add event listeners for Insert and Reject buttons
+        document.querySelectorAll('.btn-success').forEach(button => {
+            button.addEventListener('click', function() {
+                // Find the corresponding item from the items array
+                const itemId = this.getAttribute('data-id');
+                const item = items.find(i => i._id === itemId);
+                
+                if (item) {
+                    // Fill the form with the item data
+                    fillFormWithInboxItem(item);
+                }
+            });
+        });
+        
+        // Add event listeners for Reject buttons (to be implemented later)
+        document.querySelectorAll('.btn-danger').forEach(button => {
+            button.addEventListener('click', function() {
+                // TODO: Implement reject functionality
+                console.log('Reject clicked for item:', this.getAttribute('data-id'));
+            });
+        });
+    }
+    
+    // Function to fill the form with inbox item data
+    function fillFormWithInboxItem(item) {
+        // Get form elements
+        const nameInput = document.getElementById('name');
+        const dateRangeInput = document.getElementById('date-range');
+        const cityInput = document.getElementById('city');
+        const urlInput = document.getElementById('url');
+        const notesInput = document.getElementById('notes');
+
+        // Populate with item id
+        document.getElementById('inbox-item-id').value = item._id;
+        
+        // Format date range for the flatpickr input
+        let dateRange = '';
+        if (item.date) {
+            const startDate = item.date.start_date ? new Date(item.date.start_date) : null;
+            const endDate = item.date.end_date ? new Date(item.date.end_date) : null;
+            
+            if (startDate && endDate) {
+                // Format dates as YYYY-MM-DD for flatpickr
+                const formatDate = (date) => {
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const day = String(date.getDate()).padStart(2, '0');
+                    return `${year}-${month}-${day}`;
+                };
+                
+                dateRange = `${formatDate(startDate)} to ${formatDate(endDate)}`;
+            }
+        }
+        
+        // Get city from location if available
+        let city = '';
+        if (item.location) {
+            if (typeof item.location === 'string') {
+                city = item.location;
+            } else if (item.location.city) {
+                city = item.location.city;
+            }
+        }
+        
+        // Fill the form fields
+        nameInput.value = item.name || '';
+        dateRangeInput.value = dateRange;
+        cityInput.value = city;
+        urlInput.value = item.url || '';
+        notesInput.value = item.notes || '';
+        
+        // Set the status radio button if available
+        if (item.status) {
+            const statusRadio = document.getElementById(item.status.toLowerCase());
+            if (statusRadio) {
+                statusRadio.checked = true;
+            } 
+        }
+        // Reinitialize flatpickr to update the date picker with the new value
+        initializeFlatpickr();
+        
+        // Scroll to the form
+        document.querySelector('form').scrollIntoView({ behavior: 'smooth' });
     }
     
     // Load items when the page loads

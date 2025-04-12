@@ -7,14 +7,21 @@ import uvicorn
 from settings import settings
 import httpx
 import os
-from shared_models import Hackathon, HackathonStatus, Location, Coordinates, DateRange
-from database import get_db
+from shared_models import Hackathon, HackathonStatus, Location, Coordinates, DateRange, InboxStatus
+from database import get_db, get_async_db, init_db
+import logging
+from bson import ObjectId
 
 app = FastAPI()
+
+init_db(app)
 
 geocoder = OpenCageGeocode(settings.OPENCAGE_API_KEY)
 
 templates = Jinja2Templates(directory="templates")
+
+logger = logging.getLogger(__name__)
+
 
 @app.get("/", response_class=HTMLResponse)
 async def read_form(request: Request):
@@ -64,8 +71,43 @@ def get_city_data(city):
     )
 
 
+async def approve_inbox_item(db, inbox_item_id: str, session=None) -> bool:
+    """
+    Update an inbox item's status to APPROVED.
+    Raises an exception if the update fails.
+    """
+    result = await db.inbox.update_one(
+        {"_id": ObjectId(inbox_item_id), "review_status": InboxStatus.PENDING.value},
+        {"$set": {"review_status": InboxStatus.APPROVED.value}},
+        session=session
+    )
+    
+    if result.matched_count == 0:
+        raise ValueError(f"Inbox item {inbox_item_id} not found or not in PENDING status")
+    if result.modified_count == 0:
+        raise ValueError(f"Failed to update inbox item {inbox_item_id}")
+    
+    return True
+
+
+async def perform_transaction(session, db, hackathon, inbox_item_id=None):
+    """Function to run within a transaction"""
+    insert_result = await db.hackathons.insert_one(
+        hackathon.to_mongo(),
+        session=session
+    )
+    
+    if inbox_item_id:
+        try:
+            await approve_inbox_item(db, inbox_item_id, session)
+        except ValueError as e:
+            raise e
+        
+    return insert_result
+
+
 @app.post("/submit")
-async def submit_form(request: Request, db = Depends(get_db)):
+async def submit_form(request: Request, db = Depends(get_async_db)):
     collection = db.hackathons
     try:
         data = await request.json()
@@ -95,9 +137,38 @@ async def submit_form(request: Request, db = Depends(get_db)):
             status=HackathonStatus(data['status']),
         )
 
-        db_id = collection.insert_one(hackathon.to_mongo())
-        return {"message": f"Hackathon added successfully!<br>City: {location.city}<br>State: {location.state}<br>Country: {location.country}"
-                            f"<br>ID of the inserted document: {db_id.inserted_id}"}
+        # Get inbox_item_id if provided
+        inbox_item_id = data.get('inbox_item_id')
+
+        session = await db.client.start_session()
+
+        try:
+            # Use 'async with' and 'await' to correctly start and manage the session
+             
+                # Use 'await' to execute the transaction via the helper method
+                # Pass an awaitable lambda that calls our perform_transaction
+            insert_result = await session.with_transaction(
+                lambda s: perform_transaction(s, db, hackathon, inbox_item_id)
+            )
+            # Return success message with the ID
+            return {"message": "Submission successful", "hackathon_id": str(insert_result.inserted_id)}
+
+        except ValueError as ve:
+            # Catch specific logical errors from perform_transaction (like approval failure)
+            raise HTTPException(
+                status_code=400,  # Bad Request seems appropriate
+                detail=f"Transaction failed: {str(ve)}. No changes were made."
+            )
+        except Exception as e:
+            # Catch other unexpected database or transaction errors
+            logger.error(f"Unexpected error during submission transaction: {e}", exc_info=True)
+            raise HTTPException(
+                status_code=500, # Internal Server Error
+                detail=f"An unexpected error occurred during submission: {str(e)}"
+            )
+        finally:
+            await session.end_session()
+
     except ValueError as ve:
         raise HTTPException(status_code=422, detail=f"Validation error: {str(ve)}")
     except Exception as e:
@@ -173,6 +244,71 @@ async def get_inbox_items(status: str | None = None, db = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching inbox items: {str(e)}")
 
+
+@app.post("/toggle-database")
+async def toggle_database(request: Request):
+    """
+    Toggle between staging and production database environments.
+    This endpoint updates the ENVIRONMENT setting and all subsequent
+    database operations will use the new environment.
+    """
+    try:
+        data = await request.json()
+        new_environment = data.get("environment")
+        
+        # Validate the environment value
+        if new_environment not in ["production", "staging"]:
+            raise ValueError("Environment must be either 'production' or 'staging'")
+        
+        # Skip if the environment is already set to the requested value
+        if settings.ENVIRONMENT == new_environment:
+            return {
+                "success": True,
+                "message": f"Already using {new_environment} environment",
+                "current_environment": new_environment,
+                "database": settings.mongodb_database
+            }
+        
+        # Update the environment setting
+        settings.update_environment(new_environment)
+        
+        # Verify that the environment setting was actually updated
+        if settings.ENVIRONMENT != new_environment:
+            raise Exception(f"Environment update failed: Still set to {settings.ENVIRONMENT}")
+
+        db = get_db()
+        # Check which database we're actually connected to
+        actual_db_name = db.name
+        expected_db_name = settings.mongodb_database
+        
+        # Verify we're connected to the expected database
+        if actual_db_name != expected_db_name:
+            raise Exception(f"Database switch failed: Connected to {actual_db_name} instead of {expected_db_name}")
+        
+        return {
+            "success": True,
+            "message": f"Switched to {new_environment} environment",
+            "current_environment": new_environment,
+            "database": actual_db_name
+        }
+        
+    except ValueError as ve:
+        raise HTTPException(status_code=422, detail=str(ve))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to toggle database: {str(e)}")
+
+
+@app.get("/current-environment")
+async def get_current_environment(db = Depends(get_db)):
+    """
+    Get the current database environment and database name.
+    """
+    return {
+        "environment": settings.ENVIRONMENT,
+        "database": db.name,
+        "is_production": settings.is_production,
+        "is_testing": settings.is_testing
+    }
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="localhost", port=8001, reload=True)

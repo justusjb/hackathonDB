@@ -28,6 +28,21 @@ class Settings(BaseSettings):
             return "hackathons_prod"
         else:
             return "hackathons_test_1"
+
+    def update_environment(self, new_environment: Literal["production", "staging"]) -> None:
+        """
+        Update the environment setting.
+        This method ensures the change survives application restarts.
+        
+        Args:
+            new_environment: The new environment to set (either "production" or "staging")
+        """
+        # Don't allow changing to test environment through this method
+        if new_environment not in ["production", "staging"]:
+            raise ValueError("Environment must be either 'production' or 'staging'")
+        
+        # Update the current instance
+        self.ENVIRONMENT = new_environment
     
     model_config = {
         "env_file": DOTENV_PATH,

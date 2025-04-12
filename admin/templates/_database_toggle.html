@@ -1,0 +1,111 @@
+<div class="card mt-3">
+    <div class="card-header">
+        <h2 class="h5 mb-0">Database Environment</h2>
+    </div>
+    <div class="card-body">
+        <div class="d-flex align-items-center mb-3">
+            <span class="me-3">Current environment:</span>
+            <span id="current-environment" class="badge rounded-pill"></span>
+            <span class="ms-2">Database:</span>
+            <span id="current-database" class="badge bg-secondary rounded-pill ms-1"></span>
+        </div>
+        
+        <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" id="db-toggle-switch">
+            <label class="form-check-label" for="db-toggle-switch">Toggle Production/Staging</label>
+        </div>
+        
+        <div id="toggle-result" class="mt-3 alert" style="display: none;"></div>
+    </div>
+</div>
+
+<script>
+    // Function to fetch and display the current environment
+    async function updateEnvironmentDisplay() {
+        try {
+            const response = await fetch('/current-environment');
+            const data = await response.json();
+            
+            const envBadge = document.getElementById('current-environment');
+            const dbBadge = document.getElementById('current-database');
+            const toggleSwitch = document.getElementById('db-toggle-switch');
+            
+            // Update the environment badge
+            envBadge.textContent = data.environment;
+            envBadge.className = 'badge rounded-pill';
+            
+            if (data.environment === 'production') {
+                envBadge.classList.add('bg-danger');
+                toggleSwitch.checked = true;
+            } else {
+                envBadge.classList.add('bg-success');
+                toggleSwitch.checked = false;
+            }
+            
+            // Update the database name
+            dbBadge.textContent = data.database;
+            
+        } catch (error) {
+            console.error('Error fetching environment:', error);
+        }
+    }
+    
+    // Toggle the database environment
+    async function toggleDatabase(newEnvironment) {
+        const resultDiv = document.getElementById('toggle-result');
+        const toggleSwitch = document.getElementById('db-toggle-switch');
+        
+        // Disable the switch during the operation
+        toggleSwitch.disabled = true;
+        resultDiv.style.display = 'none';
+        
+        try {
+            const response = await fetch('/toggle-database', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ environment: newEnvironment })
+            });
+            
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.detail || `HTTP error! Status: ${response.status}`);
+            }
+            
+            // Success!
+            resultDiv.textContent = data.message;
+            resultDiv.className = 'mt-3 alert alert-success';
+            resultDiv.style.display = 'block';
+            
+            // Update the display
+            updateEnvironmentDisplay();
+            
+        } catch (error) {
+            console.error('Error toggling database:', error);
+            resultDiv.textContent = 'Error: ' + error.message;
+            resultDiv.className = 'mt-3 alert alert-danger';
+            resultDiv.style.display = 'block';
+            
+            // Reset the toggle to match the current state
+            updateEnvironmentDisplay();
+        } finally {
+            // Re-enable the switch
+            toggleSwitch.disabled = false;
+        }
+    }
+    
+    // Initialize the display when the page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        updateEnvironmentDisplay();
+        
+        // Set up the toggle switch event handler
+        const toggleSwitch = document.getElementById('db-toggle-switch');
+        toggleSwitch.addEventListener('change', function() {
+            const newEnvironment = this.checked ? 'production' : 'staging';
+            toggleDatabase(newEnvironment);
+        });
+    });
+</script>

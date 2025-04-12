@@ -1,5 +1,7 @@
 <div class="container">
-    <form>
+    <form id="hackathon-form">
+
+        <input type="hidden" id="inbox-item-id" name="inbox_item_id" value="">
 
         <label for="name">Hackathon Name:</label>
         <input type="text" id="name" name="name" autocomplete="off">
@@ -34,6 +36,7 @@
             </div>
 
         <input type="submit" value="Submit">
+        <button type="button" id="clear-form-btn" class="btn btn-secondary">Clear Form</button>
     </form>
     <div id="message"></div>
 </div>
@@ -58,6 +61,7 @@
             const result = await response.json();
             const messageDiv = document.getElementById('message');
             if (response.ok) {
+                document.getElementById('inbox-item-id').value = ''; // clear hidden inbox item id
                 messageDiv.innerHTML = '<p class="success">' + result.message + '</p>';
                 event.target.reset();
                 initializeFlatpickr(); // Reinitialize Flatpickr after form reset
@@ -124,7 +128,45 @@
             flatpickrInstance.changeMonth(calculateMonthDifference(selectedMonth, flatpickrInstance.currentYear, flatpickrInstance.currentMonth));
             flatpickrInstance.clear();
         }
-    
-        initializeMonthPicker(); // Initialize the month picker when the DOM is ready
+        
+        // Check if we already have a date range
+        if (dateInput.value && dateInput.value.includes(" to ")) {
+            // Initialize directly in range mode with existing dates
+            flatpickrInstance = flatpickr(dateInput, {
+                mode: 'range',
+                dateFormat: 'Y-m-d',
+                minDate: 'today',
+                defaultDate: dateInput.value.split(" to "),
+                locale: {
+                    firstDayOfWeek: 1
+                }
+            });
+        } else {
+            // Initialize with month picker as before
+            initializeMonthPicker();
+        }
+
     }
+
+    function clearForm() {
+    const form = document.getElementById('hackathon-form');
+    form.reset(); // Resets most standard inputs
+
+    // Clear specific fields not handled by reset (like hidden fields, potentially select/custom inputs)
+    document.getElementById('inbox-item-id').value = '';
+    document.getElementById('notes').value = ''; // Textarea might need explicit clearing
+
+    // Reset Flatpickr - Destroy existing instance and re-initialize in month mode
+    const dateInput = document.getElementById('date-range');
+    if (dateInput._flatpickr) {
+        dateInput._flatpickr.destroy();
+    }
+    // Re-call your initializeFlatpickr function, or specifically initialize the month picker part
+    initializeFlatpickr(); // Assuming this function handles the initial month setup
+
+    console.log('Form cleared.');
+}
+
+// Attach event listener
+document.getElementById('clear-form-btn').addEventListener('click', clearForm);
 </script>
