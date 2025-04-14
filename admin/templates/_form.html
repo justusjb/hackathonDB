@@ -65,6 +65,7 @@
                 messageDiv.innerHTML = '<p class="success">' + result.message + '</p>';
                 event.target.reset();
                 initializeFlatpickr(); // Reinitialize Flatpickr after form reset
+                loadPendingInboxItems();
             } else {
                 messageDiv.innerHTML = '<p class="error">' + result.detail + '</p>';
             }
@@ -166,6 +167,8 @@
 
     console.log('Form cleared.');
 }
+
+
 
 // Attach event listener
 document.getElementById('clear-form-btn').addEventListener('click', clearForm);
