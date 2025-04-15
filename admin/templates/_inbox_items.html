@@ -155,6 +155,7 @@
         const cityInput = document.getElementById('city');
         const urlInput = document.getElementById('url');
         const notesInput = document.getElementById('notes');
+        const source = document.getElementById('source')
 
         // Populate with item id
         document.getElementById('inbox-item-id').value = item._id;
@@ -194,6 +195,7 @@
         cityInput.value = city;
         urlInput.value = item.url || '';
         notesInput.value = item.notes || '';
+        source.value = item.scraper_name || '';
         
         // Set the status radio button if available
         if (item.status) {

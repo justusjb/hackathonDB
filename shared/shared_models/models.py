@@ -81,6 +81,7 @@ class HackathonBase(BaseModel):
     url: HttpUrl
     notes: Optional[str] = None
     status: HackathonStatus
+    source: Optional[str] = None # This is only optional for backwards compatibility. Make this non-optional later.
 
     @field_validator('url', mode='before')
     @classmethod

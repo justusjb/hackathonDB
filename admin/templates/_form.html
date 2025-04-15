@@ -2,6 +2,7 @@
     <form id="hackathon-form">
 
         <input type="hidden" id="inbox-item-id" name="inbox_item_id" value="">
+        <input type="hidden" id="source" name="source" value="manual">
 
         <label for="name">Hackathon Name:</label>
         <input type="text" id="name" name="name" autocomplete="off">
@@ -61,7 +62,7 @@
             const result = await response.json();
             const messageDiv = document.getElementById('message');
             if (response.ok) {
-                document.getElementById('inbox-item-id').value = ''; // clear hidden inbox item id
+                clearHiddenFields();
                 messageDiv.innerHTML = '<p class="success">' + result.message + '</p>';
                 event.target.reset();
                 initializeFlatpickr(); // Reinitialize Flatpickr after form reset
@@ -154,8 +155,7 @@
     form.reset(); // Resets most standard inputs
 
     // Clear specific fields not handled by reset (like hidden fields, potentially select/custom inputs)
-    document.getElementById('inbox-item-id').value = '';
-    document.getElementById('notes').value = ''; // Textarea might need explicit clearing
+    clearHiddenFields();
 
     // Reset Flatpickr - Destroy existing instance and re-initialize in month mode
     const dateInput = document.getElementById('date-range');
@@ -166,6 +166,12 @@
     initializeFlatpickr(); // Assuming this function handles the initial month setup
 
     console.log('Form cleared.');
+}
+
+function clearHiddenFields(){
+    document.getElementById('source').value = 'manual'; // clear hidden source name
+    document.getElementById('inbox-item-id').value = '';
+    document.getElementById('notes').value = ''; // Textarea might need explicit clearing
 }
 
 
