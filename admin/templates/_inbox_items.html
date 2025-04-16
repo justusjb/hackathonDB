@@ -59,9 +59,17 @@
             const location = item.location || 'N/A';
             const notes = item.notes || '';
             
+            // check if inbox item is in the past
+            const start_date_raw = item.date && item.date.start_date ? new Date(item.date.start_date) : null;
+            const now = new Date();
+            let pastClass = '';
+            if (start_date_raw && start_date_raw < now) {
+                pastClass = 'past-hackathon-inbox-item';
+            }
+            
             // Displaying more details in a list item
             html += `
-                <li class="list-group-item inbox-item mb-2">
+                <li class="list-group-item inbox-item mb-2 ${pastClass}">
                     <strong>${name}</strong> (${start_date} - ${end_date}) - ${location}<br>
                     URL: ${url}<br>
                     Source: ${source} <br>
