@@ -24,14 +24,36 @@
             box-sizing: border-box;
             text-align: center;
         }
-        form {
+        #hackathon-form {
             background: #fff;
             padding: 20px;
             border-radius: 5px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             width: 100%;
+            max-width: 100vw;
             box-sizing: border-box;
+        }
+        .form-indicator-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            width: 100%;
             margin-top: 2vh;
+        }
+
+        #inbox-indicator,
+        #indicator-placeholder {
+            min-width: 220px;
+            max-width: 260px;
+        }
+
+        #inbox-indicator {
+            margin-right: 24px;
+        }
+
+        #indicator-placeholder {
+            visibility: hidden;   /* Invisible but takes up space */
+            margin-left: 24px;
         }
         label {
             display: block;

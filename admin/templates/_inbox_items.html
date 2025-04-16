@@ -193,6 +193,7 @@
         }
         // Reinitialize flatpickr to update the date picker with the new value
         initializeFlatpickr();
+        updateInboxIndicator(item.name || 'Unnamed Inbox Item');
         
         // Scroll to the form
         document.querySelector('form').scrollIntoView({ behavior: 'smooth' });

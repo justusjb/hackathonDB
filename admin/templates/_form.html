@@ -1,4 +1,8 @@
 <div class="container">
+<div class="form-indicator-wrapper">
+    <div id="inbox-indicator">
+        <!-- JS will fill this -->
+    </div>
     <form id="hackathon-form">
 
         <input type="hidden" id="inbox-item-id" name="inbox_item_id" value="">
@@ -40,10 +44,13 @@
         <button type="button" id="clear-form-btn" class="btn btn-secondary">Clear Form</button>
     </form>
     <div id="message"></div>
+    <div id="indicator-placeholder"></div>
+</div>
 </div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        updateInboxIndicator(null);
         initializeFlatpickr();
     
         async function submitForm(event) {
@@ -156,6 +163,7 @@
 
     // Clear specific fields not handled by reset (like hidden fields, potentially select/custom inputs)
     clearHiddenFields();
+    updateInboxIndicator(null);
 
     // Reset Flatpickr - Destroy existing instance and re-initialize in month mode
     const dateInput = document.getElementById('date-range');
@@ -174,8 +182,20 @@ function clearHiddenFields(){
     document.getElementById('notes').value = ''; // Textarea might need explicit clearing
 }
 
-
-
 // Attach event listener
 document.getElementById('clear-form-btn').addEventListener('click', clearForm);
+
+
+function updateInboxIndicator(name) {
+    const indicator = document.getElementById('inbox-indicator');
+    if (name) {
+        indicator.innerHTML = `<div style="background:#f5f5f5;border-left:4px solid #007bff;padding:8px 12px;border-radius:4px;">
+            You are entering: <span style="color:#007bff">${name}</span>
+        </div>`;
+    } else {
+        indicator.innerHTML = `<div style="background:#f5f5f5;padding:8px 12px;border-radius:4px;color:#888;">
+            <em>No inbox item selected</em>
+        </div>`;
+    }
+}
 </script>
