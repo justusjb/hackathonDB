@@ -247,6 +247,21 @@ async def get_inbox_items(status: str | None = None, db = Depends(get_db)):
         raise HTTPException(status_code=500, detail=f"Error fetching inbox items: {str(e)}")
 
 
+@app.post("/inbox/reject")
+async def reject_inbox_item(request: Request, db=Depends(get_async_db)):
+    data = await request.json()
+    inbox_item_id = data.get("inbox_item_id")
+    if not inbox_item_id:
+        raise HTTPException(status_code=400, detail="Missing inbox_item_id")
+    result = await db.inbox.update_one(
+        {"_id": ObjectId(inbox_item_id)},
+        {"$set": {"review_status": InboxStatus.REJECTED.value}},
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Inbox item not found")
+    return {"status": "success"}
+    
+
 @app.post("/toggle-database")
 async def toggle_database(request: Request):
     """
