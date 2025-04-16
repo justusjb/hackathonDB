@@ -152,7 +152,8 @@ async def submit_form(request: Request, db = Depends(get_async_db)):
                 lambda s: perform_transaction(s, db, hackathon, inbox_item_id)
             )
             # Return success message with the ID
-            return {"message": "Submission successful", "hackathon_id": str(insert_result.inserted_id)}
+            return {"message": f"Hackathon added successfully!<br>City: {location.city}<br>State: {location.state}<br>Country: {location.country}", 
+            "hackathon_id": str(insert_result.inserted_id)}
 
         except ValueError as ve:
             # Catch specific logical errors from perform_transaction (like approval failure)
