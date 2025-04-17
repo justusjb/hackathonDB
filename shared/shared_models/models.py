@@ -82,6 +82,7 @@ class HackathonBase(BaseModel):
     notes: Optional[str] = None
     status: HackathonStatus
     source: Optional[str] = None # This is only optional for backwards compatibility. Make this non-optional later.
+    application_form: Optional[str] = None
 
     @field_validator('url', mode='before')
     @classmethod

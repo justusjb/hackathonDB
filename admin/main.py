@@ -135,7 +135,8 @@ async def submit_form(request: Request, db = Depends(get_async_db)):
             url=data['url'],
             notes=data.get('notes', ''),
             status=HackathonStatus(data['status']),
-            source=data['source']
+            source=data['source'],
+            application_form=data['application_form']
         )
 
         # Get inbox_item_id if provided
