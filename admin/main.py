@@ -43,7 +43,7 @@ def get_city_data(city):
     all_city_data = geodata_api_call(city)
 
     if all_city_data is None:
-        print("City not found. Retrying with prefix:")
+        print("City not found. Retrying with 'city of' prefix...")
         query_prefix = 'city of'
         all_city_data = geodata_api_call(f"{query_prefix} {city}")
         if all_city_data is None:
@@ -133,10 +133,10 @@ async def submit_form(request: Request, db = Depends(get_async_db)):
             date=date_range,
             location=location,
             url=data['url'],
-            notes=data.get('notes', ''),
+            notes=data.get('notes', None),
             status=HackathonStatus(data['status']),
             source=data['source'],
-            application_form=data['application_form']
+            application_form=data.get('application_form', None)
         )
 
         # Get inbox_item_id if provided
