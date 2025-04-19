@@ -79,6 +79,9 @@
             resultDiv.textContent = data.message;
             resultDiv.className = 'mt-3 alert alert-success';
             resultDiv.style.display = 'block';
+
+            // refresh database
+            loadPendingInboxItems();
             
             // Update the display
             updateEnvironmentDisplay();
