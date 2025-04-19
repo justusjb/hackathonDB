@@ -117,6 +117,10 @@ async def submit_form(request: Request, db = Depends(get_async_db)):
         start_date = datetime.strptime(dates[0], "%Y-%m-%d")
         end_date = datetime.strptime(dates[1], "%Y-%m-%d")
 
+        application_deadline = data.get('application_deadline', None)
+        if application_deadline:
+            application_deadline = datetime.strptime(application_deadline, "%Y-%m-%d")
+
         # Handle city
         input_city = data['city']
         location = get_city_data(input_city)
@@ -136,7 +140,8 @@ async def submit_form(request: Request, db = Depends(get_async_db)):
             notes=data.get('notes', None),
             status=HackathonStatus(data['status']),
             source=data['source'],
-            application_form=data.get('application_form', None)
+            application_form=data.get('application_form', None),
+            application_deadline=application_deadline
         )
 
         # Get inbox_item_id if provided

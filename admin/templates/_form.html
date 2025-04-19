@@ -20,8 +20,11 @@
         <label for="url">URL:</label>
         <input type="text" id="url" name="url" autocomplete="off">
 
-        <label for="url">Application form URL:</label>
+        <label for="application_form">Application form URL:</label>
         <input type="text" id="application_form" name="application_form" autocomplete="off">
+
+        <label for="application_deadline">Application Deadline:</label>
+        <input type="text" id="application_deadline" name="application_deadline" autocomplete="off">
 
         <label for="notes">Notes:</label>
         <input type="text" id="notes" name="notes" autocomplete="off">
@@ -55,7 +58,7 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        updateInboxIndicator(null);
+        updateInboxIndicator(null, null);
         initializeFlatpickr();
     
         async function submitForm(event) {
@@ -89,6 +92,13 @@
     });
     
     function initializeFlatpickr() {
+
+        // Hackathon date range init
+        //
+        //
+        //
+        // ------------------------
+
         const dateInput = document.getElementById('date-range');
         let flatpickrInstance;
     
@@ -160,6 +170,25 @@
             initializeMonthPicker();
         }
 
+
+        // Application Deadline init
+        //
+        //
+        //
+        // ------------------------
+
+        const deadlineInput = document.getElementById('application_deadline');
+        if (deadlineInput) {
+            // Destroy any previous instance if present
+            if (deadlineInput._flatpickr) {
+                deadlineInput._flatpickr.destroy();
+            }
+            flatpickr(deadlineInput, {
+                dateFormat: 'Y-m-d',
+                allowInput: true
+            });
+        }
+
     }
 
     function clearForm() {
@@ -168,7 +197,7 @@
 
     // Clear specific fields not handled by reset (like hidden fields, potentially select/custom inputs)
     clearHiddenFields();
-    updateInboxIndicator(null);
+    updateInboxIndicator(null, null);
 
     // Reset Flatpickr - Destroy existing instance and re-initialize in month mode
     const dateInput = document.getElementById('date-range');
@@ -191,11 +220,11 @@ function clearHiddenFields(){
 document.getElementById('clear-form-btn').addEventListener('click', clearForm);
 
 
-function updateInboxIndicator(name) {
+function updateInboxIndicator(name, url) {
     const indicator = document.getElementById('inbox-indicator');
     if (name) {
         indicator.innerHTML = `<div style="background:#f5f5f5;border-left:4px solid #007bff;padding:8px 12px;border-radius:4px;">
-            You are entering: <span style="color:#007bff">${name}</span>
+            You are entering: <a href="${url || '#'}" target="_blank" style="color:#007bff">${name}</a>
         </div>`;
     } else {
         indicator.innerHTML = `<div style="background:#f5f5f5;padding:8px 12px;border-radius:4px;color:#888;">

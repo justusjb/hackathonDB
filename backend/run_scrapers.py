@@ -24,7 +24,7 @@ def get_active_scrapers() -> List[BaseScraper]:
         # Example: Scrape MLH for the current year + 1 (adjust year as needed)
         from datetime import date
         current_year = date.today().year
-        #scrapers.append(MlhScraper(year=current_year)) # Use both current and next year in the future
+        scrapers.append(MlhScraper(year=current_year)) # Use both current and next year in the future
     except ValueError as e:
         logger.error(f"Failed to initialize MlhScraper: {e}")
     except Exception as e:
@@ -32,7 +32,7 @@ def get_active_scrapers() -> List[BaseScraper]:
 
     # Always include MockScraper for demonstration/testing if needed
     # In production, you might comment this out or control it via settings
-    scrapers.append(MockScraper())
+    # scrapers.append(MockScraper())
 
     # Add other scrapers here later, e.g.:
     # scrapers.append(DevpostScraper())
