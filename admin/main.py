@@ -189,7 +189,7 @@ async def trigger_scrape():
     Trigger a new scraping run by calling the backend's trigger endpoint.
     This endpoint is designed to be called from the admin panel's "Run Scrapers" button.
     """
-    backend_url = os.getenv("BACKEND_URL", "http://localhost:8000")
+    backend_url = settings.BACKEND_URL
     try:
         async with httpx.AsyncClient() as client:
             response = await client.post(
