@@ -20,6 +20,7 @@ geocoder = OpenCageGeocode(settings.OPENCAGE_API_KEY)
 
 templates = Jinja2Templates(directory="templates")
 
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 
@@ -76,6 +77,7 @@ async def approve_inbox_item(db, inbox_item_id: str, session=None) -> bool:
     Update an inbox item's status to APPROVED.
     Raises an exception if the update fails.
     """
+    logger.info(db.name)
     result = await db.inbox.update_one(
         {"_id": ObjectId(inbox_item_id), "review_status": InboxStatus.PENDING.value},
         {"$set": {"review_status": InboxStatus.APPROVED.value}},
@@ -120,6 +122,8 @@ async def submit_form(request: Request, db = Depends(get_async_db)):
         application_deadline = data.get('application_deadline', None)
         if application_deadline:
             application_deadline = datetime.strptime(application_deadline, "%Y-%m-%d")
+        else:
+            application_deadline = None
 
         # Handle city
         input_city = data['city']
