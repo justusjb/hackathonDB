@@ -11,6 +11,8 @@ class Settings(BaseSettings):
     MONGODB_URI: str
     OPENCAGE_API_KEY: str
     ADMIN_API_KEY: str
+    BACKEND_URL_PROD: str
+    BACKEND_URL_STAGING: str
     
     @property
     def is_production(self) -> bool:
@@ -28,6 +30,12 @@ class Settings(BaseSettings):
             return "hackathons_prod"
         else:
             return "hackathons_test_1"
+
+    @property
+    def BACKEND_URL(self):
+        if self.ENVIRONMENT == "production":
+            return self.BACKEND_URL_PROD
+        return self.BACKEND_URL_STAGING
 
     def update_environment(self, new_environment: Literal["production", "staging"]) -> None:
         """

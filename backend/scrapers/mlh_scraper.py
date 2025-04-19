@@ -4,12 +4,16 @@ from typing import List
 from bs4 import BeautifulSoup
 from datetime import datetime, timezone
 import requests
+import logging
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 
 def create_daterange(start_str: str | None, end_str: str | None) -> DateRange | None:
     """Parses YYYY-MM-DD date strings into a DateRange object."""
     if not start_str or not end_str:
-        print("Warning: Missing start or end date string.")
+        logger.warning("Warning: Missing start or end date string.")
         return None
     try:
         # Parse date strings, assume UTC timezone for consistency
@@ -17,7 +21,7 @@ def create_daterange(start_str: str | None, end_str: str | None) -> DateRange | 
         end_dt = datetime.strptime(end_str, "%Y-%m-%d").replace(tzinfo=timezone.utc)
         return DateRange(start_date=start_dt, end_date=end_dt)
     except ValueError as e:
-        print(f"Error parsing dates '{start_str}', '{end_str}': {e}")
+        logger.error(f"Error parsing dates '{start_str}', '{end_str}': {e}")
         return None
 
 
@@ -40,20 +44,22 @@ class MlhScraper(BaseScraper):
         self.year = year
         self.target_url = self.BASE_URL_TEMPLATE.format(year=self.year)
         self.SCRAPER_NAME = f"mlh_events_{self.year}_inperson"
-        print(f"Initialized MlhScraper for year {self.year} ({self.target_url})")
+        logger.info(f"Initialized MlhScraper for year {self.year} ({self.target_url})")
 
 
     def scrape(self) -> List[InboxItem]:
-        print(f"Executing specific scrape logic for {self.SCRAPER_NAME}...")
+        logger.info(f"Executing specific scrape logic for {self.SCRAPER_NAME}...")
         scraped_items: List[InboxItem] = []
 
         try:
             response = requests.get(self.target_url, headers=self.HEADERS, timeout=15)
+            logger.info("Status:", response.status_code)
+            logger.info("First 1000 chars of response:", response.text[:1000])
             response.raise_for_status() # Raise error if there is an HTTP error
             soup = BeautifulSoup(response.content, 'lxml')
-            print("  Successfully fetched and parsed MLH page.")
+            logger.info("  Successfully fetched and parsed MLH page.")
         except requests.exceptions.RequestException as e:
-            print(f"Error fetching {self.target_url}: {e}")
+            logger.error(f"Error fetching {self.target_url}: {e}")
             return []
 
         # --- Find upcoming events container ---
@@ -66,13 +72,13 @@ class MlhScraper(BaseScraper):
                   break
 
         if not upcoming_events_container:
-            print("  Could not find MLH upcoming events container.")
+            logger.warning("  Could not find MLH upcoming events container.")
             return []
 
         # --- Select and filter cards ---
         event_card_selector = 'div.col-lg-3.col-md-4.col-sm-6'
         all_upcoming_cards = upcoming_events_container.select(event_card_selector)
-        print(f"  Found {len(all_upcoming_cards)} total upcoming cards. Filtering for in-person...")
+        logger.info(f"  Found {len(all_upcoming_cards)} total upcoming cards. Filtering for in-person...")
 
         in_person_cards = []
         for card in all_upcoming_cards:
@@ -80,7 +86,7 @@ class MlhScraper(BaseScraper):
              if in_person_tag and "In-Person Only" in in_person_tag.get_text(strip=True):
                   in_person_cards.append(card)
 
-        print(f"  Found {len(in_person_cards)} in-person cards. Parsing...")
+        logger.info(f"  Found {len(in_person_cards)} in-person cards. Parsing...")
 
         # --- Extract data using selectors based on the provided HTML ---
         for card in in_person_cards:
@@ -127,8 +133,8 @@ class MlhScraper(BaseScraper):
                 inbox_item = InboxItem(**valid_item_data)
                 scraped_items.append(inbox_item)
             except Exception as e:
-                print(f"  Error creating InboxItem for {name}: {e}")
-                print(f"  Data: {valid_item_data}")
+                logger.error(f"  Error creating InboxItem for {name}: {e}")
+                logger.error(f"  Data: {valid_item_data}")
                 
-        print(f"  {self.SCRAPER_NAME} finished. Found {len(scraped_items)} items.")
+        logger.info(f"  {self.SCRAPER_NAME} finished. Found {len(scraped_items)} items.")
         return scraped_items
