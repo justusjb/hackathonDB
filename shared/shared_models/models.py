@@ -134,7 +134,9 @@ class Hackathon(HackathonBase):
         return str(v)
     
     @field_serializer('created_at', 'application_deadline')
-    def serialize_datetime(self, dt: datetime, info: SerializationInfo) -> str | datetime:
+    def serialize_datetime(self, dt: datetime, info: SerializationInfo) -> str | datetime | None:
+        if dt is None:
+            return None  # Contrary to what Pyright might tell you, this is not unreachable and gets called when the application_deadline is None. Else we get PydanticSerializationError
         return dt.isoformat() if info.mode == 'json' else dt  # only serializing when json is requested is a workaround to ensure that dates are date objects in the MongoDB and not strings.
 
     # Method to convert to MongoDB dictionary
