@@ -20,6 +20,7 @@ geocoder = OpenCageGeocode(settings.OPENCAGE_API_KEY)
 
 templates = Jinja2Templates(directory="templates")
 
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 
@@ -76,6 +77,7 @@ async def approve_inbox_item(db, inbox_item_id: str, session=None) -> bool:
     Update an inbox item's status to APPROVED.
     Raises an exception if the update fails.
     """
+    logger.info(db.name)
     result = await db.inbox.update_one(
         {"_id": ObjectId(inbox_item_id), "review_status": InboxStatus.PENDING.value},
         {"$set": {"review_status": InboxStatus.APPROVED.value}},
@@ -120,6 +122,8 @@ async def submit_form(request: Request, db = Depends(get_async_db)):
         application_deadline = data.get('application_deadline', None)
         if application_deadline:
             application_deadline = datetime.strptime(application_deadline, "%Y-%m-%d")
+        else:
+            application_deadline = None
 
         # Handle city
         input_city = data['city']
@@ -308,6 +312,33 @@ async def toggle_database(request: Request):
         if actual_db_name != expected_db_name:
             raise Exception(f"Database switch failed: Connected to {actual_db_name} instead of {expected_db_name}")
         
+
+        """
+        !!!
+        From here on temporary code to toggle backend database. 
+        Remove this once migrated to automated scraping from deployed backend
+        !!!
+        """
+        # Call backend to update its environment
+        backend_url = settings.BACKEND_URL  # Should resolve to http://localhost:8000 or prod backend
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{backend_url}/set-environment",
+                json={"environment": new_environment},
+                headers={"X-API-Key": settings.ADMIN_API_KEY},
+                timeout=10.0
+            )
+            response.raise_for_status()
+            backend_result = response.json()
+            if backend_result.get("status") != "success":
+                raise Exception(f"Backend failed to switch environment: {backend_result}")
+        """
+        !!!
+        End of temporary code to toggle backend database. 
+        Remove this once migrated to automated scraping from deployed backend
+        !!!
+        """
+
         return {
             "success": True,
             "message": f"Switched to {new_environment} environment",

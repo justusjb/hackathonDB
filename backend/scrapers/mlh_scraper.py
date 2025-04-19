@@ -53,8 +53,8 @@ class MlhScraper(BaseScraper):
 
         try:
             response = requests.get(self.target_url, headers=self.HEADERS, timeout=15)
-            logger.info("Status:", response.status_code)
-            logger.info("First 1000 chars of response:", response.text[:1000])
+            logger.info(f"Status: {response.status_code}")
+            logger.info(f"First 1000 chars of response:{response.text[:1000]}")
             response.raise_for_status() # Raise error if there is an HTTP error
             soup = BeautifulSoup(response.content, 'lxml')
             logger.info("  Successfully fetched and parsed MLH page.")
