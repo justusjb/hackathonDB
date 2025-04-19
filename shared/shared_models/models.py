@@ -81,6 +81,9 @@ class HackathonBase(BaseModel):
     url: HttpUrl
     notes: Optional[str] = None
     status: HackathonStatus
+    source: Optional[str] = None # This is only optional for backwards compatibility. Make this non-optional later.
+    application_form: Optional[str] = None
+    application_deadline: Optional[datetime] = None
 
     @field_validator('url', mode='before')
     @classmethod
@@ -130,7 +133,7 @@ class Hackathon(HackathonBase):
     def serialize_url(self, v: HttpUrl) -> str:
         return str(v)
     
-    @field_serializer('created_at')
+    @field_serializer('created_at', 'application_deadline')
     def serialize_datetime(self, dt: datetime, info: SerializationInfo) -> str | datetime:
         return dt.isoformat() if info.mode == 'json' else dt  # only serializing when json is requested is a workaround to ensure that dates are date objects in the MongoDB and not strings.
 

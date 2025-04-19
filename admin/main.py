@@ -43,7 +43,7 @@ def get_city_data(city):
     all_city_data = geodata_api_call(city)
 
     if all_city_data is None:
-        print("City not found. Retrying with prefix:")
+        print("City not found. Retrying with 'city of' prefix...")
         query_prefix = 'city of'
         all_city_data = geodata_api_call(f"{query_prefix} {city}")
         if all_city_data is None:
@@ -117,6 +117,10 @@ async def submit_form(request: Request, db = Depends(get_async_db)):
         start_date = datetime.strptime(dates[0], "%Y-%m-%d")
         end_date = datetime.strptime(dates[1], "%Y-%m-%d")
 
+        application_deadline = data.get('application_deadline', None)
+        if application_deadline:
+            application_deadline = datetime.strptime(application_deadline, "%Y-%m-%d")
+
         # Handle city
         input_city = data['city']
         location = get_city_data(input_city)
@@ -133,8 +137,11 @@ async def submit_form(request: Request, db = Depends(get_async_db)):
             date=date_range,
             location=location,
             url=data['url'],
-            notes=data.get('notes', ''),
+            notes=data.get('notes', None),
             status=HackathonStatus(data['status']),
+            source=data['source'],
+            application_form=data.get('application_form', None),
+            application_deadline=application_deadline
         )
 
         # Get inbox_item_id if provided
@@ -151,7 +158,8 @@ async def submit_form(request: Request, db = Depends(get_async_db)):
                 lambda s: perform_transaction(s, db, hackathon, inbox_item_id)
             )
             # Return success message with the ID
-            return {"message": "Submission successful", "hackathon_id": str(insert_result.inserted_id)}
+            return {"message": f"Hackathon added successfully!<br>City: {location.city}<br>State: {location.state}<br>Country: {location.country}", 
+            "hackathon_id": str(insert_result.inserted_id)}
 
         except ValueError as ve:
             # Catch specific logical errors from perform_transaction (like approval failure)
@@ -244,6 +252,21 @@ async def get_inbox_items(status: str | None = None, db = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching inbox items: {str(e)}")
 
+
+@app.post("/inbox/reject")
+async def reject_inbox_item(request: Request, db=Depends(get_async_db)):
+    data = await request.json()
+    inbox_item_id = data.get("inbox_item_id")
+    if not inbox_item_id:
+        raise HTTPException(status_code=400, detail="Missing inbox_item_id")
+    result = await db.inbox.update_one(
+        {"_id": ObjectId(inbox_item_id)},
+        {"$set": {"review_status": InboxStatus.REJECTED.value}},
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Inbox item not found")
+    return {"status": "success"}
+    
 
 @app.post("/toggle-database")
 async def toggle_database(request: Request):

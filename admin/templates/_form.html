@@ -1,7 +1,12 @@
 <div class="container">
+<div class="form-indicator-wrapper">
+    <div id="inbox-indicator">
+        <!-- JS will fill this -->
+    </div>
     <form id="hackathon-form">
 
         <input type="hidden" id="inbox-item-id" name="inbox_item_id" value="">
+        <input type="hidden" id="source" name="source" value="manual">
 
         <label for="name">Hackathon Name:</label>
         <input type="text" id="name" name="name" autocomplete="off">
@@ -14,6 +19,12 @@
 
         <label for="url">URL:</label>
         <input type="text" id="url" name="url" autocomplete="off">
+
+        <label for="application_form">Application form URL:</label>
+        <input type="text" id="application_form" name="application_form" autocomplete="off">
+
+        <label for="application_deadline">Application Deadline:</label>
+        <input type="text" id="application_deadline" name="application_deadline" autocomplete="off">
 
         <label for="notes">Notes:</label>
         <input type="text" id="notes" name="notes" autocomplete="off">
@@ -37,12 +48,17 @@
 
         <input type="submit" value="Submit">
         <button type="button" id="clear-form-btn" class="btn btn-secondary">Clear Form</button>
+       
+        <div id="message"></div>
+        
     </form>
-    <div id="message"></div>
+    <div id="indicator-placeholder"></div>
+</div>
 </div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        updateInboxIndicator(null, null);
         initializeFlatpickr();
     
         async function submitForm(event) {
@@ -61,7 +77,7 @@
             const result = await response.json();
             const messageDiv = document.getElementById('message');
             if (response.ok) {
-                document.getElementById('inbox-item-id').value = ''; // clear hidden inbox item id
+                clearHiddenFields();
                 messageDiv.innerHTML = '<p class="success">' + result.message + '</p>';
                 event.target.reset();
                 initializeFlatpickr(); // Reinitialize Flatpickr after form reset
@@ -76,6 +92,13 @@
     });
     
     function initializeFlatpickr() {
+
+        // Hackathon date range init
+        //
+        //
+        //
+        // ------------------------
+
         const dateInput = document.getElementById('date-range');
         let flatpickrInstance;
     
@@ -147,6 +170,25 @@
             initializeMonthPicker();
         }
 
+
+        // Application Deadline init
+        //
+        //
+        //
+        // ------------------------
+
+        const deadlineInput = document.getElementById('application_deadline');
+        if (deadlineInput) {
+            // Destroy any previous instance if present
+            if (deadlineInput._flatpickr) {
+                deadlineInput._flatpickr.destroy();
+            }
+            flatpickr(deadlineInput, {
+                dateFormat: 'Y-m-d',
+                allowInput: true
+            });
+        }
+
     }
 
     function clearForm() {
@@ -154,8 +196,8 @@
     form.reset(); // Resets most standard inputs
 
     // Clear specific fields not handled by reset (like hidden fields, potentially select/custom inputs)
-    document.getElementById('inbox-item-id').value = '';
-    document.getElementById('notes').value = ''; // Textarea might need explicit clearing
+    clearHiddenFields();
+    updateInboxIndicator(null, null);
 
     // Reset Flatpickr - Destroy existing instance and re-initialize in month mode
     const dateInput = document.getElementById('date-range');
@@ -168,8 +210,26 @@
     console.log('Form cleared.');
 }
 
-
+function clearHiddenFields(){
+    document.getElementById('source').value = 'manual'; // clear hidden source name
+    document.getElementById('inbox-item-id').value = '';
+    document.getElementById('notes').value = ''; // Textarea might need explicit clearing
+}
 
 // Attach event listener
 document.getElementById('clear-form-btn').addEventListener('click', clearForm);
+
+
+function updateInboxIndicator(name, url) {
+    const indicator = document.getElementById('inbox-indicator');
+    if (name) {
+        indicator.innerHTML = `<div style="background:#f5f5f5;border-left:4px solid #007bff;padding:8px 12px;border-radius:4px;">
+            You are entering: <a href="${url || '#'}" target="_blank" style="color:#007bff">${name}</a>
+        </div>`;
+    } else {
+        indicator.innerHTML = `<div style="background:#f5f5f5;padding:8px 12px;border-radius:4px;color:#888;">
+            <em>No inbox item selected</em>
+        </div>`;
+    }
+}
 </script>
